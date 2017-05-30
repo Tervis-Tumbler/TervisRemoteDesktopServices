@@ -15,7 +15,7 @@ function Invoke-StoresRemoteDesktopProvision {
     )
     Invoke-ClusterApplicationProvision -ClusterApplicationName StoresRemoteDesktop -EnvironmentName $EnvironmentName
     $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName StoresRemoteDesktop -EnvironmentName $EnvironmentName
-    $Nodes | New-TervisRdsSessionCollection
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup 'Privilege_StoresRDS_RemoteDesktop'
     $Nodes | Add-TervisRdsSessionHost
 }
 
@@ -38,7 +38,8 @@ function Add-TervisRdsServer {
 function New-TervisRdsSessionCollection {
     param (
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName,
-        [Parameter(ValueFromPipelineByPropertyName)]$ClusterApplicationName
+        [Parameter(ValueFromPipelineByPropertyName)]$ClusterApplicationName,
+        [Parameter(Mandatory)]$CollectionSecurityGroup
     )
     Begin {
         $RDBroker = Get-ADComputer -filter 'Name -like "*broker*"' | Select -ExpandProperty DNSHostName
@@ -51,7 +52,7 @@ function New-TervisRdsSessionCollection {
             Set-RDSessionCollectionConfiguration `
                 -ConnectionBroker $RDBroker `
                 -CollectionName ($Node).ClusterApplicationName `
-                -UserGroup 'Privilege_StoresRDS_RemoteDesktop' `
+                -UserGroup $CollectionSecurityGroup `
                 -DisconnectedSessionLimitMin 720 `
                 -IdleSessionLimitMin 720 `
                 -AutomaticReconnectionEnabled
