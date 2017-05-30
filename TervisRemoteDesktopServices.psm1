@@ -15,7 +15,7 @@ function Invoke-StoresRemoteDesktopProvision {
     )
     Invoke-ClusterApplicationProvision -ClusterApplicationName StoresRemoteDesktop -EnvironmentName $EnvironmentName
     $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName StoresRemoteDesktop -EnvironmentName $EnvironmentName
-    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup 'Privilege_StoresRDS_RemoteDesktop'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup 'Privilege_StoresRDS_RemoteDesktop' -CollectionDescription 'Stores Remote Desktop Services'
     $Nodes | Add-TervisRdsSessionHost
 }
 
@@ -39,7 +39,8 @@ function New-TervisRdsSessionCollection {
     param (
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName,
         [Parameter(ValueFromPipelineByPropertyName)]$ClusterApplicationName,
-        [Parameter(Mandatory)]$CollectionSecurityGroup
+        [Parameter(Mandatory)]$CollectionSecurityGroup,
+        [Parameter(Mandatory)]$CollectionDescription
     )
     Begin {
         $RDBroker = Get-ADComputer -filter 'Name -like "*broker*"' | Select -ExpandProperty DNSHostName
@@ -48,7 +49,7 @@ function New-TervisRdsSessionCollection {
     Process {
         If (-NOT (Get-RDSessionCollection -ConnectionBroker $RDBroker -CollectionName ($Node).ClusterApplicationName -ErrorAction SilentlyContinue)) {
             $SessionHost = ($Node).ComputerName + '.' + $DNSRoot
-            New-RDSessionCollection -CollectionName ($Node).ClusterApplicationName -ConnectionBroker $RDBroker -SessionHost $SessionHost -CollectionDescription 'Stores Remote Desktop Services'
+            New-RDSessionCollection -CollectionName ($Node).ClusterApplicationName -ConnectionBroker $RDBroker -SessionHost $SessionHost -CollectionDescription $CollectionDescription
             Set-RDSessionCollectionConfiguration `
                 -ConnectionBroker $RDBroker `
                 -CollectionName ($Node).ClusterApplicationName `
