@@ -15,9 +15,11 @@ function Invoke-StoresRemoteDesktopProvision {
     )
     Invoke-ClusterApplicationProvision -ClusterApplicationName StoresRemoteDesktop -EnvironmentName $EnvironmentName
     $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName StoresRemoteDesktop -EnvironmentName $EnvironmentName
+    $Nodes | Add-TervisRdsServer
     $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_StoresRDS_RemoteDesktop'
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Stores Remote Desktop Services'
     $Nodes | Add-TervisRdsSessionHost
+    $Nodes | Add-TervisRdsAppLockerLink
 }
 
 function Add-TervisRdsServer {
@@ -223,5 +225,28 @@ function Remove-BackOfficeRemoteDesktopRDPFile {
     process {
         $PublicDesktopPathRemote = $PublicDesktopPath | ConvertTo-RemotePath -ComputerName $ComputerName
         Remove-Item -Path "$PublicDesktopPathRemote/Remote Desktop.rdp"
+    }
+}
+
+
+function Add-TervisRdsAppLockerLink {
+    param (
+        [Parameter(ValueFromPipelineByPropertyName)]$ComputerName,
+        [Parameter(ValueFromPipelineByPropertyName)]$ClusterApplicationName
+    )
+    Begin {
+        $AppLockerGPO = Get-TervisApplockerGPO -GpoTarget RdsServer
+        $GPOTrustee = Get-GPPermission -All -Name ($AppLockerGPO).DisplayName | `
+            Where {$_.Permission -match 'GpoApply'} | `
+            Select -ExpandProperty Trustee | `
+            Select -ExpandProperty Name
+    }
+    Process {
+        if (-not ((Get-ADGroupMember $GPOTrustee).name -contains $ComputerName)) {
+            $ComputerObject = Get-ADComputer $ComputerName | Select -ExpandProperty DistinguishedName
+            Add-ADGroupMember -Identity $GPOTrustee -Members $ComputerObject
+        }
+        $TargetOU = Get-TervisClusterApplicationOrganizationalUnit -ClusterApplicationName $ClusterApplicationName | Select -ExpandProperty DistinguishedName
+        New-GPLink -Guid ($AppLockerGPO).Id -Target $TargetOU -ErrorAction SilentlyContinue
     }
 }
