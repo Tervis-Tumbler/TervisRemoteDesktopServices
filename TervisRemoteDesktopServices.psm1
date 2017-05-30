@@ -208,7 +208,7 @@ function New-BackOfficeRemoteDesktopRDPFile {
         } else {
             "$PublicDesktopPathRemote/Manager Remote Desktop.rdp"
         }
-        $RemoteDesktopRDPContent | Out-File -FilePath $RDPFileName -NoNewline -Encoding ascii
+        $RemoteDesktopRDPContent | Out-File -FilePath $RDPFileName -NoNewline -Encoding ascii -Force
     }
 }
 
