@@ -224,5 +224,4 @@ function Remove-BackOfficeRemoteDesktopRDPFile {
         $PublicDesktopPathRemote = $PublicDesktopPath | ConvertTo-RemotePath -ComputerName $ComputerName
         Remove-Item -Path "$PublicDesktopPathRemote/Remote Desktop.rdp"
     }
-
 }
