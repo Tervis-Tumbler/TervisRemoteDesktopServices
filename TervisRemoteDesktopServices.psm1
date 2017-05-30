@@ -15,7 +15,8 @@ function Invoke-StoresRemoteDesktopProvision {
     )
     Invoke-ClusterApplicationProvision -ClusterApplicationName StoresRemoteDesktop -EnvironmentName $EnvironmentName
     $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName StoresRemoteDesktop -EnvironmentName $EnvironmentName
-    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup 'Privilege_StoresRDS_RemoteDesktop' -CollectionDescription 'Stores Remote Desktop Services'
+    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_StoresRDS_RemoteDesktop'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Stores Remote Desktop Services'
     $Nodes | Add-TervisRdsSessionHost
 }
 
@@ -28,7 +29,7 @@ function Add-TervisRdsServer {
         $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
     }
     Process {
-        $SessionHost = ($Node).ComputerName + '.' + $DNSRoot
+        $SessionHost = $ComputerName + '.' + $DNSRoot
         If (-NOT (Get-RDServer -ConnectionBroker $RDBroker -Role RDS-RD-SERVER -ErrorAction SilentlyContinue | Where Server -Contains $SessionHost)) {
             Add-RDServer -Server $SessionHost -ConnectionBroker $RDBroker -Role RDS-RD-SERVER
         }
@@ -47,16 +48,16 @@ function New-TervisRdsSessionCollection {
         $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
     }
     Process {
-        If (-NOT (Get-RDSessionCollection -ConnectionBroker $RDBroker -CollectionName ($Node).ClusterApplicationName -ErrorAction SilentlyContinue)) {
-            $SessionHost = ($Node).ComputerName + '.' + $DNSRoot
-            New-RDSessionCollection -CollectionName ($Node).ClusterApplicationName -ConnectionBroker $RDBroker -SessionHost $SessionHost -CollectionDescription $CollectionDescription
+        If (-NOT (Get-RDSessionCollection -ConnectionBroker $RDBroker -CollectionName $ClusterApplicationName -ErrorAction SilentlyContinue)) {
+            $SessionHost = $ComputerName + '.' + $DNSRoot
+            New-RDSessionCollection -CollectionName $ClusterApplicationName -ConnectionBroker $RDBroker -SessionHost $SessionHost -CollectionDescription $CollectionDescription
             Set-RDSessionCollectionConfiguration `
                 -ConnectionBroker $RDBroker `
-                -CollectionName ($Node).ClusterApplicationName `
+                -CollectionName $ClusterApplicationName `
                 -UserGroup $CollectionSecurityGroup `
                 -DisconnectedSessionLimitMin 720 `
                 -IdleSessionLimitMin 720 `
-                -AutomaticReconnectionEnabled
+                -AutomaticReconnectionEnabled $true
         }
     }
 }
@@ -71,9 +72,9 @@ function Add-TervisRdsSessionHost {
         $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
     }
     Process {
-        If (-NOT ((Get-RDSessionHost -CollectionName ($Node).ClusterApplicationName -ConnectionBroker $RDBroker -ErrorAction SilentlyContinue) -contains ($Node).ComputerName)) {
-            $SessionHost = ($Node).ComputerName + '.' + $DNSRoot
-            Add-RDSessionHost -CollectionName ($Node).ClusterApplicationName -SessionHost $SessionHost -ConnectionBroker $RDBroker
+        If (-NOT ((Get-RDSessionHost -CollectionName $ClusterApplicationName -ConnectionBroker $RDBroker -ErrorAction SilentlyContinue) -contains $ComputerName)) {
+            $SessionHost = $ComputerName + '.' + $DNSRoot
+            Add-RDSessionHost -CollectionName $ClusterApplicationName -SessionHost $SessionHost -ConnectionBroker $RDBroker
         }
     }
 }
