@@ -5,8 +5,10 @@
     Invoke-ClusterApplicationProvision -ClusterApplicationName RemoteWebBrowserApp -EnvironmentName $EnvironmentName
     $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName RemoteWebBrowserApp -EnvironmentName $EnvironmentName
     $Nodes | Add-TervisRdsServer
+    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_StoresRDS_RemoteDesktop'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Stores Remote Desktop Services'
     $Nodes | Add-TervisRdsSessionHost
-    $Nodes | New-TervisRdsSessionCollection
+    $Nodes | Add-TervisRdsAppLockerLink
 }
 
 function Invoke-StoresRemoteDesktopProvision {
@@ -210,7 +212,7 @@ function New-BackOfficeRemoteDesktopRDPFile {
         } else {
             "$PublicDesktopPathRemote/Manager Remote Desktop.rdp"
         }
-        $RemoteDesktopRDPContent | Out-File -FilePath $RDPFileName -NoNewline -Encoding ascii -Force
+        $RemoteDesktopRDPContent | Out-File -FilePath $RDPFileName -NoNewline -Encoding ascii
     }
 }
 
