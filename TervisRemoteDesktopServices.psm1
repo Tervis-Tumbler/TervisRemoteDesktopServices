@@ -47,7 +47,14 @@ function New-TervisRdsSessionCollection {
     Process {
         If (-NOT (Get-RDSessionCollection -ConnectionBroker $RDBroker -CollectionName ($Node).ClusterApplicationName -ErrorAction SilentlyContinue)) {
             $SessionHost = ($Node).ComputerName + '.' + $DNSRoot
-            New-RDSessionCollection -CollectionName ($Node).ClusterApplicationName -ConnectionBroker $RDBroker -SessionHost $SessionHost -CollectionDescription 'Stores Remote Desktop Services' 
+            New-RDSessionCollection -CollectionName ($Node).ClusterApplicationName -ConnectionBroker $RDBroker -SessionHost $SessionHost -CollectionDescription 'Stores Remote Desktop Services'
+            Set-RDSessionCollectionConfiguration `
+                -ConnectionBroker $RDBroker `
+                -CollectionName ($Node).ClusterApplicationName `
+                -UserGroup 'Privilege_StoresRDS_RemoteDesktop' `
+                -DisconnectedSessionLimitMin 720 `
+                -IdleSessionLimitMin 720 `
+                -AutomaticReconnectionEnabled
         }
     }
 }
