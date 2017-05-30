@@ -134,7 +134,7 @@ username:s:$UserName
 "@
 }
 
-function New-BackOfficeRemoteDesktopShortcut {
+function New-BackOfficeRemoteDesktopRDPFile {
     param (
         $ComputerName,
         $UserName
@@ -149,7 +149,7 @@ function New-BackOfficeRemoteDesktopShortcut {
     }
 }
 
-function Remove-BackOfficeRemoteDesktopShortcut {
+function Remove-BackOfficeRemoteDesktopRDPFile {
     param (
         $ComputerName,
         $UserName
