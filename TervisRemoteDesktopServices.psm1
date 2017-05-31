@@ -66,6 +66,14 @@ function New-TervisRdsSessionCollection {
     }
 }
 
+function Add-StoreManagerToStoresRdsPrivilege {
+    param()
+    $StoreManagers = Get-PaylocityADUser | where {$_.PaylocityDepartmentName -eq 'stores' -and $_.Enabled}
+    Foreach ($Employee in $StoreManagers) {
+        Add-ADGroupMember -Identity 'Privilege_StoresRDS_RemoteDesktop' -Members ($Employee).DistinguishedName
+    }
+}
+
 function Add-TervisRdsSessionHost {
     param (
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName,
@@ -229,7 +237,6 @@ function Remove-BackOfficeRemoteDesktopRDPFile {
         Remove-Item -Path "$PublicDesktopPathRemote/Remote Desktop.rdp"
     }
 }
-
 
 function Add-TervisRdsAppLockerLink {
     param (
