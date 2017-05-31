@@ -68,10 +68,21 @@ function New-TervisRdsSessionCollection {
 
 function Add-StoreManagerToStoresRdsPrivilege {
     param()
-    $StoreManagers = Get-PaylocityADUser | where {$_.PaylocityDepartmentName -eq 'stores' -and $_.Enabled}
-    Foreach ($Employee in $StoreManagers) {
+    $StoreManagers = Get-PaylocityEmployees -Status A | where {$_.DepartmentName -eq 'Stores' -and $_.JobTitle -eq 'Store Manager'}
+    $StoreManagerAdUsers = @()
+    foreach ($Manager in $StoreManagers) {
+        $EmployeeID = ($Manager).EmployeeID
+        $StoreManagerAdUsers += Get-ADUser -Filter {EmployeeID -eq $EmployeeID} -Properties MemberOf,EmployeeID
+    }
+    Foreach ($Employee in $StoreManagerAdUsers) {
         If (-NOT (($Employee).MemberOf -like "*Privilege_StoresRDS_RemoteDesktop*")) {
             Add-ADGroupMember -Identity 'Privilege_StoresRDS_RemoteDesktop' -Members ($Employee).DistinguishedName
+        }
+    }
+    $GroupMembers = Get-ADGroupMember -Identity 'Privilege_StoresRDS_RemoteDesktop'
+    foreach ($GroupMember in $GroupMembers) {
+        If (-NOT (($GroupMember).DistinguishedName -like "*OU=Store Accounts,*" -or ($GroupMember).DistinguishedName -in ($StoreManagerAdUsers).DistinguishedName)) {
+            Remove-ADGroupMember -Identity 'Privilege_StoresRDS_RemoteDesktop' -Members ($GroupMember).DistinguishedName -Confirm:$false
         }
     }
 }
