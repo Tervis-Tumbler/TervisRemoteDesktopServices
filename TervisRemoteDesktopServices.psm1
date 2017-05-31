@@ -70,7 +70,9 @@ function Add-StoreManagerToStoresRdsPrivilege {
     param()
     $StoreManagers = Get-PaylocityADUser | where {$_.PaylocityDepartmentName -eq 'stores' -and $_.Enabled}
     Foreach ($Employee in $StoreManagers) {
-        Add-ADGroupMember -Identity 'Privilege_StoresRDS_RemoteDesktop' -Members ($Employee).DistinguishedName
+        If (-NOT (($Employee).MemberOf -like "*Privilege_StoresRDS_RemoteDesktop*")) {
+            Add-ADGroupMember -Identity 'Privilege_StoresRDS_RemoteDesktop' -Members ($Employee).DistinguishedName
+        }
     }
 }
 
