@@ -99,7 +99,10 @@ function Install-StoreManagerToStoresRdsPrivilegeScheduledTasks {
         $Argument = '-Command Update-StoreManagerToStoresRdsPrivilege -NoProfile'
     }
     process {
-        Install-TervisScheduledTask -Credential $ScheduledTaskCredential -TaskName Update-StoreManagerToStoresRdsPrivilege -Execute $Execute -Argument $Argument -RepetitionIntervalName EveryDayAt2am -ComputerName $ComputerName
+        $CimSession = New-CimSession -ComputerName $ComputerName
+        If (-NOT (Get-ScheduledTask -TaskName Update-StoreManagerToStoresRdsPrivilege -CimSession $CimSession -ErrorAction SilentlyContinue)) {
+            Install-TervisScheduledTask -Credential $ScheduledTaskCredential -TaskName Update-StoreManagerToStoresRdsPrivilege -Execute $Execute -Argument $Argument -RepetitionIntervalName EveryDayAt2am -ComputerName $ComputerName
+        }
     }
 }
 
