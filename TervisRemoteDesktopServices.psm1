@@ -9,6 +9,7 @@
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Stores Remote Desktop Services'
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
+    $Nodes | Update-StoreManagerToStoresRdsPrivilege
 }
 
 function Invoke-StoresRemoteDesktopProvision {
@@ -22,6 +23,7 @@ function Invoke-StoresRemoteDesktopProvision {
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Stores Remote Desktop Services'
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
+    $Nodes | Update-StoreManagerToStoresRdsPrivilege
 }
 
 function Add-TervisRdsServer {
@@ -66,7 +68,7 @@ function New-TervisRdsSessionCollection {
     }
 }
 
-function Add-StoreManagerToStoresRdsPrivilege {
+function Update-StoreManagerToStoresRdsPrivilege {
     param()
     $StoreManagers = Get-PaylocityEmployees -Status A | where {$_.DepartmentName -eq 'Stores' -and $_.JobTitle -eq 'Store Manager'}
     $StoreManagerAdUsers = @()
@@ -86,6 +88,21 @@ function Add-StoreManagerToStoresRdsPrivilege {
         }
     }
 }
+
+function Install-StoreManagerToStoresRdsPrivilegeScheduledTasks {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    begin {
+        $ScheduledTaskCredential = New-Object System.Management.Automation.PSCredential (Get-PasswordstateCredential -PasswordID 259)
+        $Execute = 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
+        $Argument = '-Command Update-StoreManagerToStoresRdsPrivilege -NoProfile'
+    }
+    process {
+        Install-TervisScheduledTask -Credential $ScheduledTaskCredential -TaskName Update-StoreManagerToStoresRdsPrivilege -Execute $Execute -Argument $Argument -RepetitionIntervalName EveryDayAt2am -ComputerName $ComputerName
+    }
+}
+
 
 function Add-TervisRdsSessionHost {
     param (
