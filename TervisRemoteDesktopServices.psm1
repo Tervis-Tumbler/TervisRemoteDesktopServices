@@ -82,6 +82,13 @@ function Update-StoreManagerToStoresRdsPrivilege {
         }
     }
     $GroupMembers = Get-ADGroupMember -Identity 'Privilege_StoresRDS_RemoteDesktop'
+    $SearchBase = ($GroupMembers | Where DistinguishedName -like "*OU=Store Accounts,*")[0].DistinguishedName.Split(",",2)[1]
+    $StoreAccounts = Get-ADUser -Filter {(Enabled -eq $true)} -SearchBase $SearchBase | Where {$_.Name -NotMatch "POS" -and $_.Name -notmatch "2"}
+    Foreach ($StoreAccount in $StoreAccounts) {
+        If (-NOT (($StoreAccount).MemberOf -like "*Privilege_StoresRDS_RemoteDesktop*")) {
+            Add-ADGroupMember -Identity 'Privilege_StoresRDS_RemoteDesktop' -Members ($StoreAccount).DistinguishedName
+        }
+    }
     If ($StoreManagerAdUsers -and $GroupMembers) {
         foreach ($GroupMember in $GroupMembers) {
             If (-NOT (($GroupMember).DistinguishedName -like "*OU=Store Accounts,*" -or ($GroupMember).DistinguishedName -in ($StoreManagerAdUsers).DistinguishedName)) {
