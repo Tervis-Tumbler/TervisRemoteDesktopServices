@@ -82,14 +82,14 @@ function Update-StoreManagerToStoresRdsPrivilege {
         }
     }
     $GroupMembers = Get-ADGroupMember -Identity 'Privilege_StoresRDS_RemoteDesktop'
-    foreach ($GroupMember in $GroupMembers) {
-        If ($StoreManagerAdUsers) {
+    If ($StoreManagerAdUsers -and $GroupMembers) {
+        foreach ($GroupMember in $GroupMembers) {
             If (-NOT (($GroupMember).DistinguishedName -like "*OU=Store Accounts,*" -or ($GroupMember).DistinguishedName -in ($StoreManagerAdUsers).DistinguishedName)) {
                 Remove-ADGroupMember -Identity 'Privilege_StoresRDS_RemoteDesktop' -Members ($GroupMember).DistinguishedName -Confirm:$false
             }
-        } else {
-            Throw "The StoreManagerAdUser variable is empty."
         }
+    } else {
+        Throw "The StoreManagerAdUser variable is empty."
     }
 }
 
