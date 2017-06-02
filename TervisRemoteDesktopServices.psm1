@@ -88,7 +88,7 @@ function Update-StoreManagerToStoresRdsPrivilege {
                 Remove-ADGroupMember -Identity 'Privilege_StoresRDS_RemoteDesktop' -Members ($GroupMember).DistinguishedName -Confirm:$false
             }
         } else {
-            Throw "The StoreManagerAdUser Variable is empty"
+            Throw "The StoreManagerAdUser variable is empty."
         }
     }
 }
