@@ -68,7 +68,7 @@ function New-TervisRdsSessionCollection {
     }
 }
 
-function Update-StoreManagerToStoresRdsPrivilege {
+function Update-Privilege_StoresRDS_RemoteDesktop {
     param()
     $StoreManagers = Get-PaylocityEmployees -Status A | where {$_.DepartmentName -eq 'Stores' -and $_.JobTitle -eq 'Store Manager'}
     $StoreManagerAdUsers = @()
@@ -111,8 +111,8 @@ function Install-StoreManagerToStoresRdsPrivilegeScheduledTasks {
     }
     process {
         $CimSession = New-CimSession -ComputerName $ComputerName
-        If (-NOT (Get-ScheduledTask -TaskName Update-StoreManagerToStoresRdsPrivilege -CimSession $CimSession -ErrorAction SilentlyContinue)) {
-            Install-TervisScheduledTask -Credential $ScheduledTaskCredential -TaskName Update-StoreManagerToStoresRdsPrivilege -Execute $Execute -Argument $Argument -RepetitionIntervalName EveryDayAt2am -ComputerName $ComputerName
+        If (-NOT (Get-ScheduledTask -TaskName Update-Privilege_StoresRDS_RemoteDesktop -CimSession $CimSession -ErrorAction SilentlyContinue)) {
+            Install-TervisScheduledTask -Credential $ScheduledTaskCredential -TaskName Update-Privilege_StoresRDS_RemoteDesktop -Execute $Execute -Argument $Argument -RepetitionIntervalName EveryDayAt2am -ComputerName $ComputerName
         }
     }
 }
