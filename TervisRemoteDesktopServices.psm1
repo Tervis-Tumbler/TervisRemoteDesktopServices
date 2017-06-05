@@ -100,7 +100,7 @@ function Update-Privilege_StoresRDS_RemoteDesktop {
     }
 }
 
-function Install-StoreManagerToStoresRdsPrivilegeScheduledTasks {
+function Install-StoresRDSRemoteDesktopPrivilegeScheduledTasks {
     param (
         [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
     )
