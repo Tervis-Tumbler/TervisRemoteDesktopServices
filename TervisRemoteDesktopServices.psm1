@@ -27,6 +27,7 @@ function Invoke-StoresRemoteDesktopProvision {
 }
 
 function Invoke-KeyscanRemoteAppProvision {
+    [CmdletBinding()]
     param (
         $EnvironmentName
     )
@@ -37,6 +38,7 @@ function Invoke-KeyscanRemoteAppProvision {
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Keyscan RemoteApp'
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
+    $Nodes | Set-KeyscanOptions -DatabaseLocation Keyscan
 }
 
 function Add-TervisRdsServer {
@@ -314,5 +316,24 @@ function Add-TervisRdsAppLockerLink {
         }
         $TargetOU = Get-TervisClusterApplicationOrganizationalUnit -ClusterApplicationName $ClusterApplicationName | Select -ExpandProperty DistinguishedName
         New-GPLink -Guid ($AppLockerGPO).Id -Target $TargetOU -ErrorAction SilentlyContinue
+    }
+}
+
+function Set-KeyscanOptions {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName,
+        [Parameter(Mandatory)]$DatabaseLocation,
+        [String]$RegionalTimeZone = "Eastern Standard Time"
+    )
+    process {
+        Invoke-Command -ComputerName $ComputerName -ScriptBlock {
+            New-PSDrive -PSProvider Registry -Name HKU -Root HKEY_USERS
+            New-Item -Path "HKU:\.DEFAULT\Software\VB and VBA Program Settings"
+            New-Item -Path "HKU:\.DEFAULT\Software\VB and VBA Program Settings\KEYSCAN7"
+            New-Item -Path "HKU:\.DEFAULT\Software\VB and VBA Program Settings\KEYSCAN7\DatabaseLocation"
+            New-Item -Path "HKU:\.DEFAULT\Software\VB and VBA Program Settings\KEYSCAN7\RegionalTimeZone"
+            New-ItemProperty -Path "HKU:\.DEFAULT\Software\VB and VBA Program Settings\KEYSCAN7\DatabaseLocation" -Name Address -Value $Using:DatabaseLocation -PropertyType String
+            New-ItemProperty -Path "HKU:\.DEFAULT\Software\VB and VBA Program Settings\KEYSCAN7\RegionalTimeZone" -Name StandardName -Value $Using:RegionalTimeZone -PropertyType String
+        } | Out-Null
     }
 }
