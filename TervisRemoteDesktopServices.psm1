@@ -327,13 +327,12 @@ function Set-KeyscanOptions {
     )
     process {
         Invoke-Command -ComputerName $ComputerName -ScriptBlock {
-            New-PSDrive -PSProvider Registry -Name HKU -Root HKEY_USERS
-            New-Item -Path "HKU:\.DEFAULT\Software\VB and VBA Program Settings"
-            New-Item -Path "HKU:\.DEFAULT\Software\VB and VBA Program Settings\KEYSCAN7"
-            New-Item -Path "HKU:\.DEFAULT\Software\VB and VBA Program Settings\KEYSCAN7\DatabaseLocation"
-            New-Item -Path "HKU:\.DEFAULT\Software\VB and VBA Program Settings\KEYSCAN7\RegionalTimeZone"
-            New-ItemProperty -Path "HKU:\.DEFAULT\Software\VB and VBA Program Settings\KEYSCAN7\DatabaseLocation" -Name Address -Value $Using:DatabaseLocation -PropertyType String
-            New-ItemProperty -Path "HKU:\.DEFAULT\Software\VB and VBA Program Settings\KEYSCAN7\RegionalTimeZone" -Name StandardName -Value $Using:RegionalTimeZone -PropertyType String
+            New-Item -Path "HKLM:\Software\VB and VBA Program Settings"
+            New-Item -Path "HKLM:\Software\VB and VBA Program Settings\KEYSCAN7"
+            New-Item -Path "HKLM:\Software\VB and VBA Program Settings\KEYSCAN7\DatabaseLocation"
+            New-Item -Path "HKLM:\Software\VB and VBA Program Settings\KEYSCAN7\RegionalTimeZone"
+            New-ItemProperty -Path "HKLM:\Software\VB and VBA Program Settings\KEYSCAN7\DatabaseLocation" -Name Address -Value $Using:DatabaseLocation -PropertyType String
+            New-ItemProperty -Path "HKLM:\Software\VB and VBA Program Settings\KEYSCAN7\RegionalTimeZone" -Name StandardName -Value $Using:RegionalTimeZone -PropertyType String
         } | Out-Null
     }
 }
