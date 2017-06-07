@@ -26,6 +26,19 @@ function Invoke-StoresRemoteDesktopProvision {
     $Nodes | Update-StoreManagerToStoresRdsPrivilege
 }
 
+function Invoke-KeyscanRemoteAppProvision {
+    param (
+        $EnvironmentName
+    )
+    Invoke-ClusterApplicationProvision -ClusterApplicationName KeyscanRemoteApp -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName KeyscanRemoteApp -EnvironmentName $EnvironmentName
+    $Nodes | Add-TervisRdsServer
+    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_KeyscanRemoteApp'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Keyscan RemoteApp'
+    $Nodes | Add-TervisRdsSessionHost
+    $Nodes | Add-TervisRdsAppLockerLink
+}
+
 function Add-TervisRdsServer {
     param (
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
