@@ -41,6 +41,22 @@ function Invoke-KeyscanRemoteAppProvision {
     $Nodes | Set-KeyscanOptions -DatabaseLocation Keyscan
 }
 
+function Invoke-WCSRemoteAppProvision {
+    [CmdletBinding()]
+    param (
+        $EnvironmentName
+    )
+    Invoke-ClusterApplicationProvision -ClusterApplicationName WCSRemoteApp -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName WCSRemoteApp -EnvironmentName $EnvironmentName
+    $Nodes | Add-TervisRdsServer
+    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_WCSRemoteApp'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'WCS RemoteApp'
+    $Nodes | Add-TervisRdsSessionHost
+    $Nodes | Add-TervisRdsAppLockerLink
+    $Nodes | Set-JavaHomeEnvironmentVariable
+    $Nodes | Install-WCSJavaRemoteAppClient
+}
+
 function Add-TervisRdsServer {
     param (
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
