@@ -77,6 +77,7 @@ function New-TervisRdsSessionCollection {
     param (
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName,
         [Parameter(ValueFromPipelineByPropertyName)]$ClusterApplicationName,
+        [Parameter(ValueFromPipelineByPropertyName)]$EnvironmentName,
         [Parameter(Mandatory)]$CollectionSecurityGroup,
         [Parameter(Mandatory)]$CollectionDescription
     )
@@ -85,12 +86,13 @@ function New-TervisRdsSessionCollection {
         $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
     }
     Process {
-        If (-NOT (Get-RDSessionCollection -ConnectionBroker $RDBroker -CollectionName $ClusterApplicationName -ErrorAction SilentlyContinue)) {
+        $CollectionName = "$(Get-TervisEnvironmentPrefix) $ClusterApplicationName"
+        If (-NOT (Get-RDSessionCollection -ConnectionBroker $RDBroker -CollectionName $CollectionName -ErrorAction SilentlyContinue)) {
             $SessionHost = $ComputerName + '.' + $DNSRoot
-            New-RDSessionCollection -CollectionName $ClusterApplicationName -ConnectionBroker $RDBroker -SessionHost $SessionHost -CollectionDescription $CollectionDescription
+            New-RDSessionCollection -CollectionName $CollectionName -ConnectionBroker $RDBroker -SessionHost $SessionHost -CollectionDescription $CollectionDescription
             Set-RDSessionCollectionConfiguration `
                 -ConnectionBroker $RDBroker `
-                -CollectionName $ClusterApplicationName `
+                -CollectionName $CollectionName `
                 -UserGroup $CollectionSecurityGroup `
                 -DisconnectedSessionLimitMin 720 `
                 -IdleSessionLimitMin 720 `
