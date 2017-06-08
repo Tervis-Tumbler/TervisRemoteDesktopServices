@@ -86,7 +86,7 @@ function New-TervisRdsSessionCollection {
         $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
     }
     Process {
-        $CollectionName = "$(Get-TervisEnvironmentPrefix) $ClusterApplicationName"
+        $CollectionName = "$(Get-TervisEnvironmentPrefix -EnvironmentName $EnvironmentName) $ClusterApplicationName"
         If (-NOT (Get-RDSessionCollection -ConnectionBroker $RDBroker -CollectionName $CollectionName -ErrorAction SilentlyContinue)) {
             $SessionHost = $ComputerName + '.' + $DNSRoot
             New-RDSessionCollection -CollectionName $CollectionName -ConnectionBroker $RDBroker -SessionHost $SessionHost -CollectionDescription $CollectionDescription
