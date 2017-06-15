@@ -1,4 +1,6 @@
-﻿function Invoke-RemoteWebBrowserAppProvision {
+﻿#requires -module TervisApplication
+
+function Invoke-RemoteWebBrowserAppProvision {
     param (
         $EnvironmentName
     )
@@ -55,6 +57,16 @@ function Invoke-WCSRemoteAppProvision {
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Set-JavaHomeEnvironmentVariable
     $Nodes | Install-WCSJavaRemoteAppClient
+}
+
+function Invoke-RemoteDesktopGatewayProvision {
+    param (
+        $EnvironmentName = "Infrastructure"
+    )
+    Invoke-ClusterApplicationProvision -ClusterApplicationName RemoteDesktopGateway -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName RemoteDesktopGateway -EnvironmentName $EnvironmentName
+    $Nodes | Install-TervisWindowsFeature -WindowsFeatureGroupNames RemoteDesktopGateway
+
 }
 
 function Add-TervisRdsServer {
@@ -149,7 +161,6 @@ function Install-StoresRDSRemoteDesktopPrivilegeScheduledTasks {
         }
     }
 }
-
 
 function Add-TervisRdsSessionHost {
     param (
@@ -352,5 +363,21 @@ function Set-KeyscanOptions {
             New-ItemProperty -Path "HKLM:\Software\VB and VBA Program Settings\KEYSCAN7\DatabaseLocation" -Name Address -Value $Using:DatabaseLocation -PropertyType String
             New-ItemProperty -Path "HKLM:\Software\VB and VBA Program Settings\KEYSCAN7\RegionalTimeZone" -Name StandardName -Value $Using:RegionalTimeZone -PropertyType String
         } | Out-Null
+    }
+}
+
+function Set-TervisRDGatewaySettings {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    begin {
+        $ADDomain = Get-DomainName -ComputerName $ComputerName            
+    }
+    process {
+        Invoke-Command -ComputerName $ComputerName -ScriptBlock {
+            Import-Module -Name RemoteDesktopServices
+            New-Item -Name Tervis_CAP -Path RDS:\GatewayServer\CAP -UserGroups "Privilege_RDGateway2016Access@$Using:ADDomain" -AuthMethod 1
+            New-Item -Name Tervis_RAP -Path RDS:\GatewayServer\RAP -UserGroups "Privilege_RDGateway2016Access@$Using:ADDomain" -ComputerGroupType 1 -ComputerGroup "Domain Computers@$Using:ADDomain"
+        }
     }
 }
