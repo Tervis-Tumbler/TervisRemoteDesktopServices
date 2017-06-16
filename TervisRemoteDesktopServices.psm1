@@ -133,7 +133,7 @@ function Add-TervisRdsWebAccessServer {
     }
     process {
         $RDWebAccessFQDN = $ComputerName + '.' + $DNSRoot
-        if (-not (Get-RDServer -ConnectionBroker $RDBroker -Role RDS-WEB-ACCESS -ErrorAction SilentlyContinue | where Server -Contains $RDWebAccessFQDN) {
+        if (-not (Get-RDServer -ConnectionBroker $RDBroker -Role RDS-WEB-ACCESS -ErrorAction SilentlyContinue | where Server -Contains $RDWebAccessFQDN)) {
             Add-RDServer -Server $RDWebAccessFQDN -Role RDS-WEB-ACCESS -ConnectionBroker $RDBroker
         }
     }
