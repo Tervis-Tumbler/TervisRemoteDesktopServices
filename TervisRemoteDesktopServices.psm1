@@ -69,6 +69,13 @@ function Invoke-RemoteDesktopGatewayProvision {
 
 }
 
+function Invoke-RemoteDesktopWebAccessProvision {
+    Invoke-ClusterApplicationProvision -ClusterApplicationName RemoteDesktopGateway -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName RemoteDesktopGateway -EnvironmentName $EnvironmentName
+    $Nodes | Add-TervisRdsWebAccessServer
+    $Nodes | Add-TervisRdsAppLockerLink
+}
+
 function Add-TervisRdsServer {
     param (
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
@@ -109,6 +116,22 @@ function New-TervisRdsSessionCollection {
                 -DisconnectedSessionLimitMin 720 `
                 -IdleSessionLimitMin 720 `
                 -AutomaticReconnectionEnabled $true
+        }
+    }
+}
+
+function Add-TervisRdsWebAccessServer {
+    param (
+        [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    begin {
+        $RDBroker = Get-ADComputer -filter 'Name -like "*broker*"' | Select -ExpandProperty DNSHostName
+        $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
+    }
+    process {
+        $RDWebAccessFQDN = $ComputerName + '.' + $DNSRoot
+        if (-not (Get-RDServer -ConnectionBroker $RDBroker -Role RDS-WEB-ACCESS -ErrorAction SilentlyContinue | where Server -Contains $RDWebAccessFQDN) {
+            Add-RDServer -Server $RDWebAccessFQDN -Role RDS-WEB-ACCESS -ConnectionBroker $RDBroker
         }
     }
 }
