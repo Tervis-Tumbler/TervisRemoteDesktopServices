@@ -70,6 +70,9 @@ function Invoke-RemoteDesktopGatewayProvision {
 }
 
 function Invoke-RemoteDesktopWebAccessProvision {
+    param (
+        $EnvironmentName = "Infrastructure"
+    )
     Invoke-ClusterApplicationProvision -ClusterApplicationName RemoteDesktopGateway -EnvironmentName $EnvironmentName
     $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName RemoteDesktopGateway -EnvironmentName $EnvironmentName
     $Nodes | Add-TervisRdsWebAccessServer
