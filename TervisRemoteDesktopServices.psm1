@@ -77,6 +77,7 @@ function Invoke-RemoteDesktopWebAccessProvision {
     $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName RemoteDesktopWebAccess -EnvironmentName $EnvironmentName
     $Nodes | Add-TervisRdsWebAccessServer
     $Nodes | Add-TervisRdsAppLockerLink
+    Set-TervisRDCertificate -Role RDWebAccess
 }
 
 function Add-TervisRdsServer {
@@ -406,4 +407,17 @@ function Set-TervisRDGatewaySettings {
             New-Item -Name Tervis_RAP -Path RDS:\GatewayServer\RAP -UserGroups "Privilege_RDGateway2016Access@$Using:ADDomain" -ComputerGroupType 1 -ComputerGroup "Domain Computers@$Using:ADDomain"
         }
     }
+}
+
+function Set-TervisRDCertificate {
+    param (
+        [ValidateSet("RDWebAccess","RDGateway","RDPublishing","RDRedirector")]
+        [Parameter(Mandatory)]$Role
+    )
+    $RDBroker = Get-ADComputer -filter 'Name -like "*broker*"' | Select -ExpandProperty DNSHostName
+    $CertificatePath = "$env:TEMP\certificate.pfx"
+    $CertificateCredential = (Get-PasswordstateCredential -PasswordID 2570)
+    Get-PasswordstateDocument -DocumentID 3 -FilePath $CertificatePath
+    Set-RDCertificate -Role $Role -ImportPath $CertificatePath -Password $CertificateCredential.Password -ConnectionBroker $RDBroker -Force
+    Remove-Item -Path $CertificatePath -Force
 }
