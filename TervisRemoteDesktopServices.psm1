@@ -65,8 +65,10 @@ function Invoke-RemoteDesktopGatewayProvision {
     )
     Invoke-ClusterApplicationProvision -ClusterApplicationName RemoteDesktopGateway -EnvironmentName $EnvironmentName
     $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName RemoteDesktopGateway -EnvironmentName $EnvironmentName
-    $Nodes | Install-TervisWindowsFeature -WindowsFeatureGroupNames RemoteDesktopGateway
-
+    $Nodes | Add-TervisRDGatewayServer
+    $Nodes | Set-TervisRDGatewayAuthorizationPolicy
+    $Nodes | Add-TervisRdsAppLockerLink
+    Set-TervisRDCertificate -Role RDGateway
 }
 
 function Invoke-RemoteDesktopWebAccessProvision {
@@ -75,7 +77,7 @@ function Invoke-RemoteDesktopWebAccessProvision {
     )
     Invoke-ClusterApplicationProvision -ClusterApplicationName RemoteDesktopWebAccess -EnvironmentName $EnvironmentName
     $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName RemoteDesktopWebAccess -EnvironmentName $EnvironmentName
-    $Nodes | Add-TervisRdsWebAccessServer
+    $Nodes | Add-TervisRDWebAccessServer
     $Nodes | Add-TervisRdsAppLockerLink
     Set-TervisRDCertificate -Role RDWebAccess
 }
@@ -124,7 +126,23 @@ function New-TervisRdsSessionCollection {
     }
 }
 
-function Add-TervisRdsWebAccessServer {
+function Add-TervisRDGatewayServer {
+    param (
+        [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    begin {
+        $RDBroker = Get-ADComputer -filter 'Name -like "*broker*"' | Select -ExpandProperty DNSHostName
+        $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
+    }
+    process {
+        $RDGatewayFQDN = $ComputerName + '.' + $DNSRoot
+        if (-not (Get-RDServer -ConnectionBroker $RDBroker -Role RDS-GATEWAY -ErrorAction SilentlyContinue | where Server -Contains $RDGatewayFQDN)) {
+            Add-RDServer -Server $RDGatewayFQDN -Role RDS-GATEWAY -ConnectionBroker $RDBroker
+        }
+    }
+}
+
+function Add-TervisRDWebAccessServer {
     param (
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
     )
@@ -393,18 +411,18 @@ function Set-KeyscanOptions {
     }
 }
 
-function Set-TervisRDGatewaySettings {
+function Set-TervisRDGatewayAuthorizationPolicy {
     param (
         [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
     )
     begin {
-        $ADDomain = Get-DomainName -ComputerName $ComputerName            
+        $ADDomain = (Get-ADDomain).Name       
     }
     process {
         Invoke-Command -ComputerName $ComputerName -ScriptBlock {
             Import-Module -Name RemoteDesktopServices
-            New-Item -Name Tervis_CAP -Path RDS:\GatewayServer\CAP -UserGroups "Privilege_RDGateway2016Access@$Using:ADDomain" -AuthMethod 1
-            New-Item -Name Tervis_RAP -Path RDS:\GatewayServer\RAP -UserGroups "Privilege_RDGateway2016Access@$Using:ADDomain" -ComputerGroupType 1 -ComputerGroup "Domain Computers@$Using:ADDomain"
+            New-Item -Name Tervis_CAP -Path RDS:\GatewayServer\CAP -UserGroups "Privilege_RDGatewayAccess@$Using:ADDomain" -AuthMethod 1
+            New-Item -Name Tervis_RAP -Path RDS:\GatewayServer\RAP -UserGroups "Privilege_RDGatewayAccess@$Using:ADDomain" -ComputerGroupType 1 -ComputerGroup "Domain Computers@$Using:ADDomain"
         }
     }
 }
