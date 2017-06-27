@@ -421,3 +421,18 @@ function Set-TervisRDCertificate {
     Set-RDCertificate -Role $Role -ImportPath $CertificatePath -Password $CertificateCredential.Password -ConnectionBroker $RDBroker -Force
     Remove-Item -Path $CertificatePath -Force
 }
+
+function Set-TervisRDBrokerSettings {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    $BrokerURI = Invoke-WmiMethod -Class "Win32_RDMSDeploymentSettings" -Namespace "root\CIMV2\rdms" -Name "GetStringProperty" `
+            -ArgumentList @("DeploymentRedirectorServer") -ComputerName $ComputerName `
+            -Authentication PacketPrivacy -ErrorAction Stop | fl
+    if (-NOT ($BrokerURI -like "*.tervis.com")) {
+    $NewBrokerURI = ($ComputerName + 'tervis.com').ToUpper()
+    Invoke-WmiMethod -Class "Win32_RDMSDeploymentSettings" -Namespace "root\CIMV2\rdms" -Name "SetStringProperty" `
+            -ArgumentList @("DeploymentRedirectorServer",$NewBrokerURI) -ComputerName $ComputerName `
+            -Authentication PacketPrivacy -ErrorAction Stop
+    }
+}
