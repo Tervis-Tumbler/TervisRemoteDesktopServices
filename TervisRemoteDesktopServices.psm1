@@ -59,6 +59,19 @@ function Invoke-WCSRemoteAppProvision {
     $Nodes | Install-WCSJavaRemoteAppClient
 }
 
+function Invoke-DataLoadClassicRemoteAppProvision {
+    param (
+        $EnvironmentName = "Infrastructure"
+    )
+    Invoke-ClusterApplicationProvision -ClusterApplicationName DataLoadClassic -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName DataLoadClassic -EnvironmentName $EnvironmentName
+    $Nodes | Add-TervisRdsServer
+    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_DataLoadClassicRemoteApp'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'DataLoad Classic RemoteApp'
+    $Nodes | Add-TervisRdsSessionHost
+    $Nodes | Add-TervisRdsAppLockerLink
+}
+
 function Invoke-RemoteDesktopGatewayProvision {
     param (
         $EnvironmentName = "Infrastructure"
