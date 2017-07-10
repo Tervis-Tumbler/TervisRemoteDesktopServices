@@ -1,4 +1,4 @@
-﻿#requires -module TervisApplication
+﻿#requires -module TervisApplication,RemoteDesktop
 
 function Invoke-RemoteWebBrowserAppProvision {
     param (
