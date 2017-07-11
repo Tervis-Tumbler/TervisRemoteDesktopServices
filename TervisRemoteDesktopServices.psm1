@@ -1,4 +1,4 @@
-﻿#requires -module TervisApplication,RemoteDesktop
+﻿#requires -module TervisApplication,RemoteDesktop,TervisJava
 
 function Invoke-RemoteWebBrowserAppProvision {
     param (
@@ -70,6 +70,8 @@ function Invoke-DataLoadClassicRemoteAppProvision {
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'DataLoad Classic RemoteApp'
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
+    $Nodes | Install-TervisJava7DeploymentRuleSet
+    $Nodes | Set-JavaToolOptionsEnvironmentVariable
 }
 
 function Invoke-RemoteDesktopGatewayProvision {
