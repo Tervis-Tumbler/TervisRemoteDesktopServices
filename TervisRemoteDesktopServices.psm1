@@ -72,6 +72,7 @@ function Invoke-DataLoadClassicRemoteAppProvision {
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Set-JavaToolOptionsEnvironmentVariable
     $Nodes | Install-TervisJava7DeploymentRuleSet
+    $Nodes | Disable-JavaUpdate
 }
 
 function Invoke-RemoteDesktopGatewayProvision {
