@@ -75,6 +75,19 @@ function Invoke-DataLoadClassicRemoteAppProvision {
     $Nodes | Disable-JavaUpdate
 }
 
+function Invoke-WindowsAppsRemoteAppProvision {
+    param (
+        $EnvironmentName = "Infrastructure"
+    )
+    Invoke-ClusterApplicationProvision -ClusterApplicationName WindowsApps -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName WindowsApps -EnvironmentName $EnvironmentName
+    $Nodes | Add-TervisRdsServer
+    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_WindowsAppsRemoteApp'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Windows Applications RemoteApp'
+    $Nodes | Add-TervisRdsSessionHost
+    $Nodes | Add-TervisRdsAppLockerLink
+}
+
 function Invoke-RemoteDesktopGatewayProvision {
     param (
         $EnvironmentName = "Infrastructure"
