@@ -239,16 +239,18 @@ function Install-StoresRDSRemoteDesktopPrivilegeScheduledTasks {
 function Add-TervisRdsSessionHost {
     param (
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName,
-        [Parameter(ValueFromPipelineByPropertyName)]$ClusterApplicationName
+        [Parameter(ValueFromPipelineByPropertyName)]$ClusterApplicationName,
+        [Parameter(ValueFromPipelineByPropertyName)]$EnvironmentName
     )
     Begin {
         $RDBroker = Get-ADComputer -filter 'Name -like "*broker*"' | Select -ExpandProperty DNSHostName
         $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
     }
     Process {
-        If (-NOT ((Get-RDSessionHost -CollectionName $ClusterApplicationName -ConnectionBroker $RDBroker -ErrorAction SilentlyContinue) -contains $ComputerName)) {
-            $SessionHost = $ComputerName + '.' + $DNSRoot
-            Add-RDSessionHost -CollectionName $ClusterApplicationName -SessionHost $SessionHost -ConnectionBroker $RDBroker
+        $CollectionName = "$(Get-TervisEnvironmentPrefix -EnvironmentName $EnvironmentName) $ClusterApplicationName"
+        $SessionHost = $ComputerName + '.' + $DNSRoot
+        If (-NOT ((Get-RDSessionHost -CollectionName $CollectionName -ConnectionBroker $RDBroker -ErrorAction SilentlyContinue).SessionHost -contains $SessionHost)) {            
+            Add-RDSessionHost -CollectionName $CollectionName -SessionHost $SessionHost -ConnectionBroker $RDBroker
         }
     }
 }
