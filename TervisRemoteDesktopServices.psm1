@@ -485,3 +485,22 @@ function Set-TervisRDBrokerSettings {
             -Authentication PacketPrivacy -ErrorAction Stop
     }
 }
+
+function Install-TervisRemoteAppsOnWindows7 {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]
+        [Alias("Name")]$ComputerName
+    )
+    begin {
+        $DomainName = Get-ADDomain | select -ExpandProperty DNSRoot
+        $StartUpDirectory = "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
+        $InstallCommandFile = @"
+powershell -windowstyle hidden -noprofile -Command "\\$DomainName\applications\Powershell\TervisRemoteApp\Install-TervisRemoteApp.ps1"
+"@
+    }    
+    process {
+        $StartUpDirectoryRemote = $StartUpDirectory | ConvertTo-RemotePath -ComputerName $ComputerName
+        $InstallCommandFile | Out-File -FilePath $StartUpDirectoryRemote\TervisRemoteApp.cmd -Encoding ascii -Force
+    }
+}
+
