@@ -95,8 +95,8 @@ function Invoke-TervisEBSRemoteAppProvision {
     Invoke-ClusterApplicationProvision -ClusterApplicationName EBSRemoteApp -EnvironmentName $EnvironmentName
     $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName EBSRemoteApp -EnvironmentName $EnvironmentName
     $Nodes | Add-TervisRdsServer
-    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_TervisEBS'
-    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Windows Applications RemoteApp'
+    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_TervisEBSRemoteApp'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Tervis EBS RemoteApp'
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Set-JavaToolOptionsEnvironmentVariable
