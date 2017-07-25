@@ -88,6 +88,25 @@ function Invoke-WindowsAppsRemoteAppProvision {
     $Nodes | Add-TervisRdsAppLockerLink
 }
 
+function Invoke-TervisEBSRemoteAppProvision {
+    param (
+        $EnvironmentName = "Infrastructure"
+    )
+    Invoke-ClusterApplicationProvision -ClusterApplicationName EBSRemoteApp -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName EBSRemoteApp -EnvironmentName $EnvironmentName
+    $Nodes | Add-TervisRdsServer
+    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_TervisEBS'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Windows Applications RemoteApp'
+    $Nodes | Add-TervisRdsSessionHost
+    $Nodes | Add-TervisRdsAppLockerLink
+    $Nodes | Set-JavaToolOptionsEnvironmentVariable
+    $Nodes | Install-TervisJava7DeploymentRuleSet
+    $Nodes | Disable-JavaUpdate
+    $Nodes | Set-TervisEBSRemoteAppBrowserPreferences
+    $Nodes | Set-TervisEPSConfiguration
+
+}
+
 function Invoke-RemoteDesktopGatewayProvision {
     param (
         $EnvironmentName = "Infrastructure"
@@ -502,4 +521,22 @@ powershell -windowstyle hidden -noprofile -Command "\\$DomainName\applications\P
         $StartUpDirectoryRemote = $StartUpDirectory | ConvertTo-RemotePath -ComputerName $ComputerName
         $InstallCommandFile | Out-File -FilePath $StartUpDirectoryRemote\TervisRemoteApp.cmd -Encoding ascii -Force
     }
+}
+
+function Set-TervisEBSRemoteAppBrowserPreferences {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    begin {
+        $DomainName = Get-ADDomain | select -ExpandProperty DNSRoot
+    }
+    process {
+        Invoke-Command -ComputerName $ComputerName -ScriptBlock {
+            New-Item -Path "C:\Program Files (x86)\Mozilla Firefox\browser" -Name "defaults" -ItemType Directory
+            New-Item -Path "C:\Program Files (x86)\Mozilla Firefox\browser\defaults" -Name "preferences" -ItemType Directory
+            Copy-Item -Path \\$Using:DomainName\applications\PowerShell\FirefoxPreferences\autoconfig.js -Destination "C:\Program Files (x86)\Mozilla Firefox\browser\defaults\preferences\"
+            Copy-Item -Path \\$Using:DomainName\applications\PowerShell\FirefoxPreferences\mozilla.cfg -Destination "C:\Program Files (x86)\Mozilla Firefox\"
+            Copy-Item -Path \\$Using:DomainName\applications\PowerShell\FirefoxPreferences\override.ini -Destination "C:\Program Files (x86)\Mozilla Firefox\browser"
+        }
+    }    
 }
