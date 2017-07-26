@@ -4,8 +4,8 @@ function Invoke-RemoteWebBrowserAppProvision {
     param (
         $EnvironmentName
     )
-    Invoke-ClusterApplicationProvision -ClusterApplicationName RemoteWebBrowserApp -EnvironmentName $EnvironmentName
-    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName RemoteWebBrowserApp -EnvironmentName $EnvironmentName
+    Invoke-ApplicationProvision -ApplicationName RemoteWebBrowserApp -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName RemoteWebBrowserApp -EnvironmentName $EnvironmentName
     $Nodes | Add-TervisRdsServer
     $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_StoresRDS_RemoteDesktop'
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Stores Remote Desktop Services'
@@ -18,8 +18,8 @@ function Invoke-StoresRemoteDesktopProvision {
     param (
         $EnvironmentName
     )
-    Invoke-ClusterApplicationProvision -ClusterApplicationName StoresRemoteDesktop -EnvironmentName $EnvironmentName
-    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName StoresRemoteDesktop -EnvironmentName $EnvironmentName
+    Invoke-ApplicationProvision -ApplicationName StoresRemoteDesktop -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName StoresRemoteDesktop -EnvironmentName $EnvironmentName
     $Nodes | Add-TervisRdsServer
     $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_StoresRDS_RemoteDesktop'
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Stores Remote Desktop Services'
@@ -33,8 +33,8 @@ function Invoke-KeyscanRemoteAppProvision {
     param (
         $EnvironmentName
     )
-    Invoke-ClusterApplicationProvision -ClusterApplicationName KeyscanRemoteApp -EnvironmentName $EnvironmentName
-    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName KeyscanRemoteApp -EnvironmentName $EnvironmentName
+    Invoke-ApplicationProvision -ApplicationName KeyscanRemoteApp -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName KeyscanRemoteApp -EnvironmentName $EnvironmentName
     $Nodes | Add-TervisRdsServer
     $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_KeyscanRemoteApp'
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Keyscan RemoteApp'
@@ -48,8 +48,8 @@ function Invoke-WCSRemoteAppProvision {
     param (
         $EnvironmentName
     )
-    Invoke-ClusterApplicationProvision -ClusterApplicationName WCSRemoteApp -EnvironmentName $EnvironmentName
-    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName WCSRemoteApp -EnvironmentName $EnvironmentName
+    Invoke-ApplicationProvision -ApplicationName WCSRemoteApp -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName WCSRemoteApp -EnvironmentName $EnvironmentName
     $Nodes | Add-TervisRdsServer
     $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_WCSRemoteApp'
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'WCS RemoteApp'
@@ -63,8 +63,8 @@ function Invoke-DataLoadClassicRemoteAppProvision {
     param (
         $EnvironmentName = "Infrastructure"
     )
-    Invoke-ClusterApplicationProvision -ClusterApplicationName DataLoadClassic -EnvironmentName $EnvironmentName
-    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName DataLoadClassic -EnvironmentName $EnvironmentName
+    Invoke-ApplicationProvision -ApplicationName DataLoadClassic -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName DataLoadClassic -EnvironmentName $EnvironmentName
     $Nodes | Add-TervisRdsServer
     $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_DataLoadClassicRemoteApp'
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'DataLoad Classic RemoteApp'
@@ -79,8 +79,8 @@ function Invoke-WindowsAppsRemoteAppProvision {
     param (
         $EnvironmentName = "Infrastructure"
     )
-    Invoke-ClusterApplicationProvision -ClusterApplicationName WindowsApps -EnvironmentName $EnvironmentName
-    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName WindowsApps -EnvironmentName $EnvironmentName
+    Invoke-ApplicationProvision -ApplicationName WindowsApps -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName WindowsApps -EnvironmentName $EnvironmentName
     $Nodes | Add-TervisRdsServer
     $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_WindowsAppsRemoteApp'
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Windows Applications RemoteApp'
@@ -92,8 +92,8 @@ function Invoke-TervisEBSRemoteAppProvision {
     param (
         $EnvironmentName = "Infrastructure"
     )
-    Invoke-ClusterApplicationProvision -ClusterApplicationName EBSRemoteApp -EnvironmentName $EnvironmentName
-    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName EBSRemoteApp -EnvironmentName $EnvironmentName
+    Invoke-ApplicationProvision -ApplicationName EBSRemoteApp -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName EBSRemoteApp -EnvironmentName $EnvironmentName
     $Nodes | Add-TervisRdsServer
     $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_TervisEBSRemoteApp'
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Tervis EBS RemoteApp'
@@ -111,8 +111,8 @@ function Invoke-RemoteDesktopGatewayProvision {
     param (
         $EnvironmentName = "Infrastructure"
     )
-    Invoke-ClusterApplicationProvision -ClusterApplicationName RemoteDesktopGateway -EnvironmentName $EnvironmentName
-    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName RemoteDesktopGateway -EnvironmentName $EnvironmentName
+    Invoke-ApplicationProvision -ApplicationName RemoteDesktopGateway -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName RemoteDesktopGateway -EnvironmentName $EnvironmentName
     $Nodes | Add-TervisRDGatewayServer
     $Nodes | Set-TervisRDGatewayAuthorizationPolicy
     $Nodes | Add-TervisRdsAppLockerLink
@@ -123,8 +123,8 @@ function Invoke-RemoteDesktopWebAccessProvision {
     param (
         $EnvironmentName = "Infrastructure"
     )
-    Invoke-ClusterApplicationProvision -ClusterApplicationName RemoteDesktopWebAccess -EnvironmentName $EnvironmentName
-    $Nodes = Get-TervisClusterApplicationNode -ClusterApplicationName RemoteDesktopWebAccess -EnvironmentName $EnvironmentName
+    Invoke-ApplicationProvision -ApplicationName RemoteDesktopWebAccess -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName RemoteDesktopWebAccess -EnvironmentName $EnvironmentName
     $Nodes | Add-TervisRDWebAccessServer
     $Nodes | Add-TervisRdsAppLockerLink
     Set-TervisRDCertificate -Role RDWebAccess
@@ -149,7 +149,7 @@ function Add-TervisRdsServer {
 function New-TervisRdsSessionCollection {
     param (
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName,
-        [Parameter(ValueFromPipelineByPropertyName)]$ClusterApplicationName,
+        [Parameter(ValueFromPipelineByPropertyName)]$ApplicationName,
         [Parameter(ValueFromPipelineByPropertyName)]$EnvironmentName,
         [Parameter(Mandatory)]$CollectionSecurityGroup,
         [Parameter(Mandatory)]$CollectionDescription
@@ -159,7 +159,7 @@ function New-TervisRdsSessionCollection {
         $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
     }
     Process {
-        $CollectionName = "$(Get-TervisEnvironmentPrefix -EnvironmentName $EnvironmentName) $ClusterApplicationName"
+        $CollectionName = "$(Get-TervisEnvironmentPrefix -EnvironmentName $EnvironmentName) $ApplicationName"
         If (-NOT (Get-RDSessionCollection -ConnectionBroker $RDBroker -CollectionName $CollectionName -ErrorAction SilentlyContinue)) {
             $SessionHost = $ComputerName + '.' + $DNSRoot
             New-RDSessionCollection -CollectionName $CollectionName -ConnectionBroker $RDBroker -SessionHost $SessionHost -CollectionDescription $CollectionDescription
@@ -258,7 +258,7 @@ function Install-StoresRDSRemoteDesktopPrivilegeScheduledTasks {
 function Add-TervisRdsSessionHost {
     param (
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName,
-        [Parameter(ValueFromPipelineByPropertyName)]$ClusterApplicationName,
+        [Parameter(ValueFromPipelineByPropertyName)]$ApplicationName,
         [Parameter(ValueFromPipelineByPropertyName)]$EnvironmentName
     )
     Begin {
@@ -266,7 +266,7 @@ function Add-TervisRdsSessionHost {
         $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
     }
     Process {
-        $CollectionName = "$(Get-TervisEnvironmentPrefix -EnvironmentName $EnvironmentName) $ClusterApplicationName"
+        $CollectionName = "$(Get-TervisEnvironmentPrefix -EnvironmentName $EnvironmentName) $ApplicationName"
         $SessionHost = $ComputerName + '.' + $DNSRoot
         If (-NOT ((Get-RDSessionHost -CollectionName $CollectionName -ConnectionBroker $RDBroker -ErrorAction SilentlyContinue).SessionHost -contains $SessionHost)) {            
             Add-RDSessionHost -CollectionName $CollectionName -SessionHost $SessionHost -ConnectionBroker $RDBroker
@@ -424,7 +424,7 @@ function Remove-BackOfficeRemoteDesktopRDPFile {
 function Add-TervisRdsAppLockerLink {
     param (
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName,
-        [Parameter(ValueFromPipelineByPropertyName)]$ClusterApplicationName
+        [Parameter(ValueFromPipelineByPropertyName)]$ApplicationName
     )
     Begin {
         $AppLockerGPO = Get-TervisApplockerGPO -GpoTarget RdsServer
@@ -438,7 +438,7 @@ function Add-TervisRdsAppLockerLink {
             $ComputerObject = Get-ADComputer $ComputerName | Select -ExpandProperty DistinguishedName
             Add-ADGroupMember -Identity $GPOTrustee -Members $ComputerObject
         }
-        $TargetOU = Get-TervisClusterApplicationOrganizationalUnit -ClusterApplicationName $ClusterApplicationName | Select -ExpandProperty DistinguishedName
+        $TargetOU = Get-TervisApplicationOrganizationalUnit -ApplicationName $ApplicationName | Select -ExpandProperty DistinguishedName
         New-GPLink -Guid ($AppLockerGPO).Id -Target $TargetOU -ErrorAction SilentlyContinue
     }
 }
