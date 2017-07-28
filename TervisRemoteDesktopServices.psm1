@@ -540,3 +540,40 @@ function Set-TervisEBSRemoteAppBrowserPreferences {
         }
     }    
 }
+
+function Write-RemoteAppDefinition {
+    param (
+        [Parameter(Mandatory)]$RemoteApps
+    )
+    $RemoteAppDefinitionString = [System.Text.StringBuilder]::new()
+    $RemoteAppCollections = $RemoteApps | select -Unique CollectionName
+    foreach ($Collection in $RemoteAppCollections.CollectionName) {
+        $RemoteAppDefinitionString.Append(@"
+[PSCustomObject][Ordered]@{
+    Name = "$($Collection.Substring(4))"
+    CollectionName = "$Collection"
+    RemoteAppDefinition = ,
+"@) | Out-Null
+        $RemoteAppsInCollection = $RemoteApps | where CollectionName -eq $Collection
+        foreach ($RemoteApp in $RemoteAppsInCollection) {
+            $RemoteAppDefinitionString.AppendLine(@"
+@{
+        Alias = "$($RemoteApp.Alias)"
+        DisplayName = "$($RemoteApp.DisplayName)"
+        FilePath = "$($RemoteApp.FilePath)"
+        ShowInWebAccess = "$($RemoteApp.ShowInWebAccess)"
+        CommandLineSetting = "$($RemoteApp.CommandLineSetting)"
+        RequiredCommandLine = "$($RemoteApp.RequiredCommandLine)"
+        UserGroups = "$($RemoteApp.UserGroups)"
+    },
+"@) | Out-Null
+        }
+        $RemoteAppDefinitionString.Length = $RemoteAppDefinitionString.Length - 3
+        $RemoteAppDefinitionString.AppendLine() | Out-Null
+        $RemoteAppDefinitionString.AppendLine("},") | Out-Null
+    }
+    $RemoteAppDefinitionString.Length = $RemoteAppDefinitionString.Length - 3
+    $DomainReplace = (Get-ADDomain).DNSRoot
+    $RemoteAppDefinitionString.Replace($DomainReplace,'$((Get-ADDomain).DNSRoot)') | Out-Null
+    $RemoteAppDefinitionString.ToString()
+}
