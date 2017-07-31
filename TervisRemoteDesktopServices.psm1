@@ -130,6 +130,11 @@ function Invoke-RemoteDesktopWebAccessProvision {
     Set-TervisRDCertificate -Role RDWebAccess
 }
 
+function Get-TervisRDBroker {
+    Get-ADComputer -filter 'Name -like "*broker*"' | 
+        Select -ExpandProperty DNSHostName
+}
+
 function Add-TervisRdsServer {
     param (
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
