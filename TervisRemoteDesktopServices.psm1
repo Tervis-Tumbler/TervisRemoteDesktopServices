@@ -75,6 +75,86 @@ $RemoteAppDefinition = [PSCustomObject][Ordered]@{
         RequiredCommandLine = "http://zet-ias01.$((Get-ADDomain).DNSRoot):8005/ -noframemerging"
         UserGroups = ""
     }
+},
+[PSCustomObject][Ordered]@{
+    Name = "WCSRemoteApp"
+    CollectionName = "INF WCSRemoteApp"
+    RemoteAppDefinition = ,@{
+        Alias = "DLTWCS"
+        DisplayName = "DLT - WCS App "
+        FilePath = "c:\DLT-WCS.cmd"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "EPSWCS"
+        DisplayName = "EPS - WCS App "
+        FilePath = "c:\EPS-WCS.cmd"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "PRDWCS"
+        DisplayName = "PRD - WCS App"
+        FilePath = "c:\PRD-WCS.cmd"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    }
+},
+[PSCustomObject][Ordered]@{
+    Name = "WindowsApps"
+    CollectionName = "INF WindowsApps"
+    RemoteAppDefinition = ,@{
+        Alias = "chrome"
+        DisplayName = "Google Chrome"
+        FilePath = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "explorer"
+        DisplayName = "File Explorer"
+        FilePath = "c:\Windows\explorer.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "firefox"
+        DisplayName = "Mozilla Firefox"
+        FilePath = "C:\Program Files\Mozilla Firefox\firefox.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "iexplore"
+        DisplayName = "Internet Explorer"
+        FilePath = "c:\Program Files\Internet Explorer\iexplore.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "https://sharepoint.tervis.com/Pages/HomePage.aspx -noframemerging"
+        UserGroups = ""
+    },
+@{
+        Alias = "MSACCESS"
+        DisplayName = "Helix Downtime Client"
+        FilePath = "C:\Program Files (x86)\Microsoft Office\Office16\MSACCESS.EXE"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "'\\$((Get-ADDomain).DNSRoot)\departments\Departments - I Drive\Shared\Operations\Chad\Helix\Helix Downtime Client.accdb'"
+        UserGroups = "TERVIS\Privilege_Helix_RemoteApps"
+    }
 }
 
 
@@ -164,6 +244,7 @@ function Invoke-WCSRemoteAppProvision {
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Set-JavaHomeEnvironmentVariable
     $Nodes | Install-WCSJavaRemoteAppClient
+    $Nodes | Invoke-RemoteAppNodeProvision
 }
 
 function Invoke-DataLoadClassicRemoteAppProvision {
@@ -193,6 +274,7 @@ function Invoke-WindowsAppsRemoteAppProvision {
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Windows Applications RemoteApp'
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
+    $Nodes | Invoke-RemoteAppNodeProvision
 }
 
 function Invoke-TervisEBSRemoteAppProvision {
@@ -211,6 +293,7 @@ function Invoke-TervisEBSRemoteAppProvision {
     $Nodes | Disable-JavaUpdate
     $Nodes | Set-TervisEBSRemoteAppBrowserPreferences
     $Nodes | Set-TervisEPSConfiguration
+    $Nodes | Invoke-RemoteAppNodeProvision
 
 }
 
