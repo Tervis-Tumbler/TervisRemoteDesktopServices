@@ -330,7 +330,7 @@ function Add-TervisRdsServer {
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
     )
     Begin {
-        $RDBroker = Get-ADComputer -filter 'Name -like "*broker*"' | Select -ExpandProperty DNSHostName
+        $RDBroker = Get-TervisRDBroker
         $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
     }
     Process {
@@ -350,7 +350,7 @@ function New-TervisRdsSessionCollection {
         [Parameter(Mandatory)]$CollectionDescription
     )
     Begin {
-        $RDBroker = Get-ADComputer -filter 'Name -like "*broker*"' | Select -ExpandProperty DNSHostName
+        $RDBroker = Get-TervisRDBroker
         $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
     }
     Process {
@@ -374,7 +374,7 @@ function Add-TervisRDGatewayServer {
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
     )
     begin {
-        $RDBroker = Get-ADComputer -filter 'Name -like "*broker*"' | Select -ExpandProperty DNSHostName
+        $RDBroker = Get-TervisRDBroker
         $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
     }
     process {
@@ -390,7 +390,7 @@ function Add-TervisRDWebAccessServer {
         [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
     )
     begin {
-        $RDBroker = Get-ADComputer -filter 'Name -like "*broker*"' | Select -ExpandProperty DNSHostName
+        $RDBroker = Get-TervisRDBroker
         $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
     }
     process {
@@ -457,7 +457,7 @@ function Add-TervisRdsSessionHost {
         [Parameter(ValueFromPipelineByPropertyName)]$EnvironmentName
     )
     Begin {
-        $RDBroker = Get-ADComputer -filter 'Name -like "*broker*"' | Select -ExpandProperty DNSHostName
+        $RDBroker = Get-TervisRDBroker
         $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
     }
     Process {
@@ -677,7 +677,7 @@ function Set-TervisRDCertificate {
         [ValidateSet("RDWebAccess","RDGateway","RDPublishing","RDRedirector")]
         [Parameter(Mandatory)]$Role
     )
-    $RDBroker = Get-ADComputer -filter 'Name -like "*broker*"' | Select -ExpandProperty DNSHostName
+    $RDBroker = Get-TervisRDBroker
     $CertificatePath = "$env:TEMP\certificate.pfx"
     $CertificateCredential = (Get-PasswordstateCredential -PasswordID 2570)
     Get-PasswordstateDocument -DocumentID 3 -FilePath $CertificatePath
