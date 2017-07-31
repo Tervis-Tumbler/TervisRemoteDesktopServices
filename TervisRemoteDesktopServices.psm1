@@ -561,7 +561,7 @@ function Write-RemoteAppDefinition {
         Alias = "$($RemoteApp.Alias)"
         DisplayName = "$($RemoteApp.DisplayName)"
         FilePath = "$($RemoteApp.FilePath)"
-        ShowInWebAccess = "$($RemoteApp.ShowInWebAccess)"
+        ShowInWebAccess = [bool]`$$($RemoteApp.ShowInWebAccess)
         CommandLineSetting = "$($RemoteApp.CommandLineSetting)"
         RequiredCommandLine = "$($RemoteApp.RequiredCommandLine)"
         UserGroups = "$($RemoteApp.UserGroups)"
