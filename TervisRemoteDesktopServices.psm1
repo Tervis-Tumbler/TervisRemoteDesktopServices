@@ -1,5 +1,112 @@
 ﻿#requires -module TervisApplication,RemoteDesktop,TervisJava
 
+$RemoteAppDefinition = [PSCustomObject][Ordered]@{
+    Name = "RemoteApps"
+    CollectionName = "INF EBSRemoteApp"
+    RemoteAppDefinition = ,@{
+        Alias = "EXCEL"
+        DisplayName = "Excel 2010"
+        FilePath = "C:\Program Files (x86)\Microsoft Office\root\Office14\EXCEL.EXE"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = "TERVIS\Domain Admins"
+    },
+@{
+        Alias = "firefox"
+        DisplayName = "DEVRP - EBS Rapid Planning [Delta]"
+        FilePath = "C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "http://dlt-ias01.$((Get-ADDomain).DNSRoot):8006/OA_HTML/AppsLogin -noframemerging"
+        UserGroups = ""
+    },
+@{
+        Alias = "firefox (1)"
+        DisplayName = "PRDRP - EBS Rapid Planning [Production]"
+        FilePath = "C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "http://ebsapps-prd.$((Get-ADDomain).DNSRoot):8011/OA_HTML/AppsLogin -noframemerging"
+        UserGroups = ""
+    },
+@{
+        Alias = "firefox (2)"
+        DisplayName = "SITRP - EBS Rapid Planning [Epsilon]"
+        FilePath = "C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "http://eps-ias01.$((Get-ADDomain).DNSRoot):8006/OA_HTML/AppsLogin -noframemerging"
+        UserGroups = ""
+    },
+@{
+        Alias = "iexplore"
+        DisplayName = "PRD - E-Business Suite (EBS) [Production]"
+        FilePath = "C:\Program Files\Internet Explorer\iexplore.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "http://ebsapps-prd.$((Get-ADDomain).DNSRoot):8010 -noframemerging"
+        UserGroups = ""
+    },
+@{
+        Alias = "iexplore (1)"
+        DisplayName = "SIT - E-Business Suite (EBS) [Epsilon]"
+        FilePath = "C:\Program Files\Internet Explorer\iexplore.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "http://eps-ias01.$((Get-ADDomain).DNSRoot):8005/OA_HTML/AppsLogin -noframemerging"
+        UserGroups = ""
+    },
+@{
+        Alias = "iexplore (2)"
+        DisplayName = "DEV - E-Business Suite (EBS) [Delta]"
+        FilePath = "C:\Program Files\Internet Explorer\iexplore.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "http://dlt-ias01.$((Get-ADDomain).DNSRoot):8005/OA_HTML/AppsLogin -noframemerging"
+        UserGroups = ""
+    },
+@{
+        Alias = "iexplore (4)"
+        DisplayName = "CNV - E-Business Suite (EBS) [Zeta]"
+        FilePath = "C:\Program Files\Internet Explorer\iexplore.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "http://zet-ias01.$((Get-ADDomain).DNSRoot):8005/ -noframemerging"
+        UserGroups = ""
+    }
+}
+
+
+function Get-TervisRemoteAppDefinition {
+    param (
+        [Parameter(Mandatory)]$CollectionName
+    )
+    
+    $RemoteAppDefinition | 
+    where CollectionName -EQ $CollectionName
+}
+
+function Invoke-RemoteAppNodeProvision {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ApplicationName,
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$EnvironmentName
+    )
+    $RDBroker = Get-TervisRDBroker
+    $CollectionName = "$(Get-TervisEnvironmentPrefix -EnvironmentName $EnvironmentName) $ApplicationName"
+    $NodeRemoteAppDefinitions = Get-TervisRemoteAppDefinition -CollectionName $CollectionName
+    foreach ($NodeRemoteAppDefinition in $NodeRemoteAppDefinitions) {
+        foreach ($RemoteApp in $NodeRemoteAppDefinition.RemoteAppDefinition) {
+            $RemoteAppParameters = $RemoteApp | Remove-HashtableKeysWithEmptyOrNullValues
+            if (Get-RDRemoteApp -CollectionName $CollectionName -ConnectionBroker $RDBroker -DisplayName $RemoteApp.DisplayName) {
+                Set-RDRemoteApp -CollectionName $CollectionName -ConnectionBroker $RDBroker @RemoteAppParameters
+            } else {
+                New-RDRemoteApp -CollectionName $CollectionName -ConnectionBroker $RDBroker @RemoteAppParameters
+            }
+        }
+    }  
+}
+
 function Invoke-RemoteWebBrowserAppProvision {
     param (
         $EnvironmentName
