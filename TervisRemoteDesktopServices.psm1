@@ -294,6 +294,7 @@ function Invoke-TervisEBSRemoteAppProvision {
     $Nodes | Set-TervisEBSRemoteAppBrowserPreferences
     $Nodes | Set-TervisEPSConfiguration
     $Nodes | Invoke-RemoteAppNodeProvision
+    $Nodes | Invoke-EBSWebADIServer2016CompatibilityHack
 
 }
 
@@ -771,4 +772,16 @@ function Write-RemoteAppDefinition {
     $DomainReplace = (Get-ADDomain).DNSRoot
     $RemoteAppDefinitionString.Replace($DomainReplace,'$((Get-ADDomain).DNSRoot)') | Out-Null
     $RemoteAppDefinitionString.ToString()
+}
+
+function Invoke-EBSWebADIServer2016CompatibilityHack {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    process {
+        Invoke-Command -ComputerName $ComputerName -ScriptBlock {
+            Rename-Item -Path C:\Windows\SysWOW64\msxml6.dll -NewName msxml6.dll.bak
+            Copy-Item -Path C:\Windows\SysWOW64\msxml3.dll -Destination C:\Windows\SysWOW64\msxml6.dll
+        }
+    }
 }
