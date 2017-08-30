@@ -295,7 +295,7 @@ function Invoke-TervisEBSRemoteAppProvision {
     $Nodes | Set-TervisEPSConfiguration
     $Nodes | Invoke-RemoteAppNodeProvision
     $Nodes | Invoke-EBSWebADIServer2016CompatibilityHack
-
+    $Nodes | Set-TervisEBSRemoteAppFileAssociations
 }
 
 function Invoke-RemoteDesktopGatewayProvision {
@@ -784,4 +784,18 @@ function Invoke-EBSWebADIServer2016CompatibilityHack {
             Copy-Item -Path C:\Windows\SysWOW64\msxml3.dll -Destination C:\Windows\SysWOW64\msxml6.dll
         }
     }
+}
+
+function Set-TervisEBSRemoteAppFileAssociations {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    process {
+        Invoke-Command -ComputerName $ComputerName -ScriptBlock {
+            New-Item -Path HKLM:\SOFTWARE\Classes\jpegfile\shell -Name Open
+            Set-ItemProperty -Path HKLM:\SOFTWARE\Classes\jpegfile\shell\Open -Name "(Default)" -Value "Open" -Type String 
+            New-Item -Path HKLM:\SOFTWARE\Classes\jpegfile\shell\Open -Name command
+            Set-ItemProperty -Path HKLM:\SOFTWARE\Classes\jpegfile\shell\Open\command -Name "(Default)" -Value '"C:\Windows\system32\mspaint.exe" "%1"' -Type String
+        }
+    }    
 }
