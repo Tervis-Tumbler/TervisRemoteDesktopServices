@@ -321,6 +321,16 @@ function Invoke-RemoteDesktopWebAccessProvision {
     Set-TervisRDCertificate -Role RDWebAccess
 }
 
+function Invoke-RemoteDesktopLicensingProvision {
+    param (
+        $EnvironmentName = "Infrastructure"
+    )
+    Invoke-ApplicationProvision -ApplicationName RemoteDesktopLicensing -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName RemoteDesktopLicensing -EnvironmentName $EnvironmentName
+    $Nodes | Add-TervisRDLicensingServer
+    $Nodes | Add-TervisRdsAppLockerLink
+}
+
 function Get-TervisRDBroker {
     Get-ADComputer -filter 'Name -like "*broker*"' | 
         Select -ExpandProperty DNSHostName
@@ -398,6 +408,22 @@ function Add-TervisRDWebAccessServer {
         $RDWebAccessFQDN = $ComputerName + '.' + $DNSRoot
         if (-not (Get-RDServer -ConnectionBroker $RDBroker -Role RDS-WEB-ACCESS -ErrorAction SilentlyContinue | where Server -Contains $RDWebAccessFQDN)) {
             Add-RDServer -Server $RDWebAccessFQDN -Role RDS-WEB-ACCESS -ConnectionBroker $RDBroker
+        }
+    }
+}
+
+function Add-TervisRDLicensingServer {
+    param (
+        [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    begin {
+        $RDBroker = Get-TervisRDBroker
+        $DNSRoot = Get-ADDomain | Select -ExpandProperty DNSRoot
+    }
+    process {
+        $RDLicensingFQDN = $ComputerName + '.' + $DNSRoot
+        if (-not (Get-RDServer -ConnectionBroker $RDBroker -Role RDS-LICENSING -ErrorAction SilentlyContinue | where Server -Contains $RDLicensingFQDN)) {
+            Add-RDServer -Server $RDLicensingFQDN -Role RDS-LICENSING -ConnectionBroker $RDBroker
         }
     }
 }
