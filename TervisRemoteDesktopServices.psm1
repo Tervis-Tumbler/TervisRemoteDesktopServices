@@ -155,6 +155,19 @@ $RemoteAppDefinition = [PSCustomObject][Ordered]@{
         RequiredCommandLine = "'\\$((Get-ADDomain).DNSRoot)\departments\Departments - I Drive\Shared\Operations\Chad\Helix\Helix Downtime Client.accdb'"
         UserGroups = "TERVIS\Privilege_Helix_RemoteApps"
     }
+},
+[PSCustomObject][Ordered]@{
+    Name = "SilverlightIE"
+    CollectionName = "INF SilverlightIE"
+    RemoteAppDefinition = ,@{
+        Alias = "iexplore"
+        DisplayName = "Edgenet Supplier Portal"
+        FilePath = "c:\Program Files\Internet Explorer\iexplore.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "https://http://supplier.edgenet.com"
+        UserGroups = ""
+    }
 }
 
 
@@ -296,6 +309,20 @@ function Invoke-TervisEBSRemoteAppProvision {
     $Nodes | Invoke-RemoteAppNodeProvision
     $Nodes | Invoke-EBSWebADIServer2016CompatibilityHack
     $Nodes | Set-TervisEBSRemoteAppFileAssociations
+}
+
+function Invoke-SilverlightIERemoteAppProvision {
+    param (
+        $EnvironmentName = "Infrastructure"
+    )
+    Invoke-ApplicationProvision -ApplicationName SilverlightIE -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName SilverlightIE -EnvironmentName $EnvironmentName
+    $Nodes | Add-TervisRdsServer
+    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_RemoteApp_SilverlightIE'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Silverlight IE for Edgenet'
+    $Nodes | Add-TervisRdsSessionHost
+    $Nodes | Add-TervisRdsAppLockerLink
+    $Nodes | Invoke-RemoteAppNodeProvision
 }
 
 function Invoke-RemoteDesktopGatewayProvision {
