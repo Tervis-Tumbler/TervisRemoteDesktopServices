@@ -833,7 +833,8 @@ function Invoke-EBSWebADIServer2016CompatibilityHack {
     )
     process {
         Invoke-Command -ComputerName $ComputerName -ScriptBlock {
-            Rename-Item -Path C:\Windows\SysWOW64\msxml6.dll -NewName msxml6.dll.bak
+            $DateCode = Get-Date -Format yyyyMMdd
+            Rename-Item -Path C:\Windows\SysWOW64\msxml6.dll -NewName "msxml6.dll.$DateCode.bak"
             Copy-Item -Path C:\Windows\SysWOW64\msxml3.dll -Destination C:\Windows\SysWOW64\msxml6.dll
         }
     }
