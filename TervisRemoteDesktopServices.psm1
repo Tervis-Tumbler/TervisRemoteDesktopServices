@@ -165,7 +165,7 @@ $RemoteAppDefinition = [PSCustomObject][Ordered]@{
         FilePath = "c:\Program Files\Internet Explorer\iexplore.exe"
         ShowInWebAccess = [bool]$True
         CommandLineSetting = "Require"
-        RequiredCommandLine = "https://http://supplier.edgenet.com"
+        RequiredCommandLine = "http://supplier.edgenet.com"
         UserGroups = ""
     }
 }
