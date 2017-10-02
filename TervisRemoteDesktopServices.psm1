@@ -168,8 +168,20 @@ $RemoteAppDefinition = [PSCustomObject][Ordered]@{
         RequiredCommandLine = "http://supplier.edgenet.com"
         UserGroups = ""
     }
+},
+[PSCustomObject][Ordered]@{
+    Name = "FedExShipManager"
+    CollectionName = "INF FedExShipManager"
+    RemoteAppDefinition = ,@{
+        Alias = "fsm"
+        DisplayName = "FedEx Ship Manager"
+        FilePath = "C:\Program Files (x86)\FedEx\ShipManager\BIN\FedEx.Gsm.Cafe.ApplicationEngine.Gui.exe"
+        ShowInWebAccess = [bool]$False
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    }
 }
-
 
 function Get-TervisRemoteAppDefinition {
     param (
@@ -320,6 +332,20 @@ function Invoke-SilverlightIERemoteAppProvision {
     $Nodes | Add-TervisRdsServer
     $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_RemoteApp_SilverlightIE'
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Silverlight IE for Edgenet'
+    $Nodes | Add-TervisRdsSessionHost
+    $Nodes | Add-TervisRdsAppLockerLink
+    $Nodes | Invoke-RemoteAppNodeProvision
+}
+
+function Invoke-TervisFedExShipManagerRemoteAppProvision {
+    param (
+        $EnvironmentName = "Infrastructure"
+    )
+    Invoke-ApplicationProvision -ApplicationName FedExShipManager -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName FedExShipManager -EnvironmentName $EnvironmentName
+    $Nodes | Add-TervisRdsServer
+    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_RemoteApp_FedExShipManager'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'FedEx Ship Manager RemoteApp/Server'
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Invoke-RemoteAppNodeProvision
