@@ -857,12 +857,25 @@ function Invoke-EBSWebADIServer2016CompatibilityHack {
     param (
         [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
     )
+    begin {
+        $DomainAdminsNTAccount = [System.Security.Principal.NTAccount]::new($env:USERDOMAIN,"Domain Admins")
+        $DomainAdminsFileSystemAccessRule = [System.Security.AccessControl.FileSystemAccessRule]::new($DomainAdminsNTAccount,"FullControl","None","None","Allow")
+        $AuthenticatedUsersFileSystemAccessRule = [System.Security.AccessControl.FileSystemAccessRule]::new("Authenticated Users","ReadAndExecute","None","None","Allow")
+    }
     process {
-        Invoke-Command -ComputerName $ComputerName -ScriptBlock {
-            $DateCode = Get-Date -Format yyyyMMdd
-            Rename-Item -Path C:\Windows\SysWOW64\msxml6.dll -NewName "msxml6.dll.$DateCode.bak"
-            Copy-Item -Path C:\Windows\SysWOW64\msxml3.dll -Destination C:\Windows\SysWOW64\msxml6.dll
-        }
+        $HackedDllLocalItem = Invoke-Command -ComputerName $ComputerName -ScriptBlock {
+            $DateCode = Get-Date -Format FileDateTime
+            Rename-Item -Path C:\Windows\SysWOW64\msxml6.dll -NewName "msxml6.dll.$DateCode.bak" | Out-Null
+            Copy-Item -Path C:\Windows\SysWOW64\msxml3.dll -Destination C:\Windows\SysWOW64\msxml6.dll -PassThru
+        } -ErrorAction Stop
+        
+        $HackedDll = Get-Item -Path ($HackedDllLocalItem.FullName | ConvertTo-RemotePath -ComputerName $ComputerName)
+        $HackedDllAcl = $HackedDll | Get-Acl
+        $HackedDllAcl.SetOwner($DomainAdminsNTAccount)
+        $HackedDllAcl.SetAccessRuleProtection($true,$false)
+        $HackedDllAcl.AddAccessRule($DomainAdminsFileSystemAccessRule)
+        $HackedDllAcl.AddAccessRule($AuthenticatedUsersFileSystemAccessRule)
+        $HackedDllAcl | Set-Acl
     }
 }
 
