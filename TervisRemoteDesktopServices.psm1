@@ -855,7 +855,8 @@ function Write-RemoteAppDefinition {
 
 function Invoke-EBSWebADIServer2016CompatibilityHack {
     param (
-        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName,
+        [Switch]$NoBackup
     )
     begin {
         $DomainAdminsNTAccount = [System.Security.Principal.NTAccount]::new($env:USERDOMAIN,"Domain Admins")
@@ -865,7 +866,10 @@ function Invoke-EBSWebADIServer2016CompatibilityHack {
     process {
         $HackedDllLocalItem = Invoke-Command -ComputerName $ComputerName -ScriptBlock {
             $DateCode = Get-Date -Format FileDateTime
-            Rename-Item -Path C:\Windows\SysWOW64\msxml6.dll -NewName "msxml6.dll.$DateCode.bak" | Out-Null
+            $BackedUpDll = Rename-Item -Path C:\Windows\SysWOW64\msxml6.dll -NewName "msxml6.dll.$DateCode.bak" -PassThru         
+            if ($using:NoBackup) {
+                Remove-Item -Path $BackedUpDll.FullName
+            }
             Copy-Item -Path C:\Windows\SysWOW64\msxml3.dll -Destination C:\Windows\SysWOW64\msxml6.dll -PassThru
         } -ErrorAction Stop
         
@@ -876,6 +880,24 @@ function Invoke-EBSWebADIServer2016CompatibilityHack {
         $HackedDllAcl.AddAccessRule($DomainAdminsFileSystemAccessRule)
         $HackedDllAcl.AddAccessRule($AuthenticatedUsersFileSystemAccessRule)
         $HackedDllAcl | Set-Acl
+    }
+}
+
+function Install-InvokeEBSWebADIServer2016CompatibilityHackScheduledTask {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    begin {
+        $TaskName = "Invoke-EBSWebADIServer2016CompatibilityHack"
+        $ScheduledTaskCredential = New-Object System.Management.Automation.PSCredential (Get-PasswordstateCredential -PasswordID 259)
+        $Execute = 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
+        $Argument = '-Command "& {Get-TervisApplicationNode -ApplicationName EBSRemoteApp -EnvironmentName Infrastructure | Invoke-EBSWebADIServer2016CompatibilityHack -NoBackup}"'
+    }
+    process {
+        $CimSession = New-CimSession -ComputerName $ComputerName
+        If (-NOT (Get-ScheduledTask -TaskName $TaskName -CimSession $CimSession -ErrorAction SilentlyContinue)) {
+            Install-TervisScheduledTask -Credential $ScheduledTaskCredential -TaskName $TaskName -Execute $Execute -Argument $Argument -RepetitionIntervalName EveryDayAt6am -ComputerName $ComputerName
+        }
     }
 }
 
