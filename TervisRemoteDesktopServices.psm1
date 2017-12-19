@@ -314,6 +314,7 @@ function Invoke-TervisEBSRemoteAppProvision {
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Set-JavaToolOptionsEnvironmentVariable
+    $Nodes | Set-JavaHomeEnvironmentVariable
     $Nodes | Install-TervisJava7DeploymentRuleSet
     $Nodes | Disable-JavaUpdate
     $Nodes | Set-TervisEBSRemoteAppBrowserPreferences
