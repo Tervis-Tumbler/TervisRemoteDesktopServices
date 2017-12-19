@@ -4,15 +4,6 @@ $RemoteAppDefinition = [PSCustomObject][Ordered]@{
     Name = "RemoteApps"
     CollectionName = "INF EBSRemoteApp"
     RemoteAppDefinition = ,@{
-        Alias = "EXCEL"
-        DisplayName = "Excel 2010"
-        FilePath = "C:\Program Files (x86)\Microsoft Office\root\Office14\EXCEL.EXE"
-        ShowInWebAccess = [bool]$True
-        CommandLineSetting = "DoNotAllow"
-        RequiredCommandLine = ""
-        UserGroups = "TERVIS\Domain Admins"
-    },
-@{
         Alias = "firefox"
         DisplayName = "DEVRP - EBS Rapid Planning [Delta]"
         FilePath = "C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
