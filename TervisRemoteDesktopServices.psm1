@@ -274,6 +274,7 @@ function Invoke-DataLoadClassicRemoteAppProvision {
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'DataLoad Classic RemoteApp'
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
+    $Nodes | Set-JavaHomeEnvironmentVariable
     $Nodes | Set-JavaToolOptionsEnvironmentVariable
     $Nodes | Install-TervisJava7DeploymentRuleSet
     $Nodes | Disable-JavaUpdate
