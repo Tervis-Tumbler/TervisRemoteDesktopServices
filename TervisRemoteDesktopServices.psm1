@@ -276,7 +276,7 @@ function Invoke-DataLoadClassicRemoteAppProvision {
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Set-JavaHomeEnvironmentVariable
     $Nodes | Set-JavaToolOptionsEnvironmentVariable
-    $Nodes | Install-TervisJava7DeploymentRuleSet
+    $Nodes | Install-TervisJavaDeploymentRuleSet
     $Nodes | Disable-JavaUpdate
 }
 
@@ -307,7 +307,7 @@ function Invoke-TervisEBSRemoteAppProvision {
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Set-JavaToolOptionsEnvironmentVariable
     $Nodes | Set-JavaHomeEnvironmentVariable
-    $Nodes | Install-TervisJava7DeploymentRuleSet
+    $Nodes | Install-TervisJavaDeploymentRuleSet
     $Nodes | Disable-JavaUpdate
     $Nodes | Set-TervisEBSRemoteAppBrowserPreferences
     $Nodes | Set-TervisEPSConfiguration
