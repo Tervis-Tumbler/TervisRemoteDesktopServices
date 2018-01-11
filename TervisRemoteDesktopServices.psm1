@@ -172,7 +172,71 @@ $RemoteAppDefinition = [PSCustomObject][Ordered]@{
         RequiredCommandLine = ""
         UserGroups = ""
     }
+},
+[PSCustomObject][Ordered]@{
+    Name = "EBSBusinessIntelligenceRemoteApp"
+    CollectionName = "INF EBSBusinessIntelligenceRemoteApp"
+    RemoteAppDefinition = ,@{
+        Alias = "firefox"
+        DisplayName = "PRD - EBS Business Intelligence (BI) [Production]"
+        FilePath = "C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "http://ebsapps-prd.$((Get-ADDomain).DNSRoot):8010 -noframemerging"
+        UserGroups = ""
+    },
+@{
+        Alias = "firefox (1)"
+        DisplayName = "SIT - EBS Business Intelligence (BI) [Epsilon]"
+        FilePath = "C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "http://eps-ias01.$((Get-ADDomain).DNSRoot):8005/OA_HTML/AppsLogin -noframemerging"
+        UserGroups = ""
+    },
+@{
+        Alias = "firefox (2)"
+        DisplayName = "DEV - EBS Business Intelligence (BI) [Delta]"
+        FilePath = "C:\Program Files (x86)\Mozilla Firefox\firefox.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "http://dlt-ias01.$((Get-ADDomain).DNSRoot):8005/OA_HTML/AppsLogin -noframemerging"
+        UserGroups = ""
+    }
+},
+[PSCustomObject][Ordered]@{
+    Name = "EBSDiscovererRemoteApp"
+    CollectionName = "INF EBSDiscovererRemoteApp"
+    RemoteAppDefinition = ,@{
+        Alias = "iexplore"
+        DisplayName = "PRD - Discoverer Plus [Production]"
+        FilePath = "C:\Program Files\Internet Explorer\iexplore.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "http://discoverer.production.$((Get-ADDomain).DNSRoot):18090/discoverer/plus?eul=EUL_US&database=PRD&connectionAccessType=APPS&responsibility=Tervis%20Discoverer%20Reports -noframemerging"
+        UserGroups = ""
+    },
+@{
+        Alias = "iexplore (1)"
+        DisplayName = "SIT - Discoverer Plus [Epsilon]"
+        FilePath = "C:\Program Files\Internet Explorer\iexplore.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "http://discoverer.epsilon.$((Get-ADDomain).DNSRoot):18090/discoverer/plus?eul=EUL_US&database=PRD&connectionAccessType=APPS&responsibility=Tervis%20Discoverer%20Reports -noframemerging"
+        UserGroups = ""
+    },
+@{
+        Alias = "iexplore (2)"
+        DisplayName = "DEV - Discoverer Plus [Delta]"
+        FilePath = "C:\Program Files\Internet Explorer\iexplore.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "Require"
+        RequiredCommandLine = "http://discoverer.delta.$((Get-ADDomain).DNSRoot):18091/discoverer/plus?eul=EUL_US&database=PRD&connectionAccessType=APPS&responsibility=Tervis%20Discoverer%20Reports -noframemerging"
+        UserGroups = ""
+    }
 }
+
+
 
 function Get-TervisRemoteAppDefinition {
     param (
@@ -316,6 +380,43 @@ function Invoke-TervisEBSRemoteAppProvision {
     $Nodes | Set-TervisEBSRemoteAppFileAssociations
 }
 
+function Invoke-TervisEBSBusinessIntelligenceRemoteAppProvision {
+    param (
+        $EnvironmentName = "Infrastructure"
+    )
+    Invoke-ApplicationProvision -ApplicationName EBSBusinessIntelligenceRemoteApp -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName EBSBusinessIntelligenceRemoteApp -EnvironmentName $EnvironmentName
+    $Nodes | Add-TervisRdsServer
+    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_TervisEBSRemoteApp'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Tervis EBS Business Intelligence RemoteApp'
+    $Nodes | Add-TervisRdsSessionHost
+    $Nodes | Add-TervisRdsAppLockerLink
+    $Nodes | Set-JavaToolOptionsEnvironmentVariable
+    $Nodes | Set-JavaHomeEnvironmentVariable
+    $Nodes | Install-TervisJavaDeploymentRuleSet
+    $Nodes | Disable-JavaUpdate
+    $Nodes | Set-TervisEBSRemoteAppBrowserPreferences
+    $Nodes | Invoke-RemoteAppNodeProvision
+}
+
+function Invoke-TervisEBSDiscovererRemoteAppProvision {
+    param (
+        $EnvironmentName = "Infrastructure"
+    )
+    Invoke-ApplicationProvision -ApplicationName EBSDiscovererRemoteApp -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName EBSDiscovererRemoteApp -EnvironmentName $EnvironmentName
+    $Nodes | Add-TervisRdsServer
+    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_TervisEBSRemoteApp'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'Tervis EBS Discoverer RemoteApp'
+    $Nodes | Add-TervisRdsSessionHost
+    $Nodes | Add-TervisRdsAppLockerLink
+    $Nodes | Set-JavaToolOptionsEnvironmentVariable
+    $Nodes | Set-JavaHomeEnvironmentVariable
+    $Nodes | Install-TervisJavaDeploymentRuleSet
+    $Nodes | Disable-JavaUpdate
+    $Nodes | Invoke-RemoteAppNodeProvision
+}
+
 function Invoke-SilverlightIERemoteAppProvision {
     param (
         $EnvironmentName = "Infrastructure"
@@ -393,7 +494,13 @@ function Add-TervisRdsServer {
     Process {
         $SessionHost = $ComputerName + '.' + $DNSRoot
         If (-NOT (Get-RDServer -ConnectionBroker $RDBroker -Role RDS-RD-SERVER -ErrorAction SilentlyContinue | Where Server -Contains $SessionHost)) {
-            Add-RDServer -Server $SessionHost -ConnectionBroker $RDBroker -Role RDS-RD-SERVER
+            try {
+                Add-RDServer -Server $SessionHost -ConnectionBroker $RDBroker -Role RDS-RD-SERVER -ErrorAction Stop
+            } catch {
+                Write-Verbose "$ComputerName`: Pending reboot. Restarting."
+                Restart-Computer -ComputerName $ComputerName -Wait -Force
+                Add-RDServer -Server $SessionHost -ConnectionBroker $RDBroker -Role RDS-RD-SERVER
+            }
         }
     }
 }
