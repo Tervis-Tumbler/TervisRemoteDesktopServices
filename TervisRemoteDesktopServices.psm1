@@ -907,3 +907,22 @@ function Set-TervisEBSRemoteAppFileAssociations {
         }
     }    
 }
+
+function Set-TervisEBSDiscovererMiscellaneousSettings {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    begin {
+        $JavaDeploymentPathLocal = "C:\Windows\Sun\Java\Deployment"
+    }
+    process {
+        $JavaDeploymentPathRemote = $JavaDeploymentPathLocal | ConvertTo-RemotePath -ComputerName $ComputerName
+        Copy-Item -Path \\$env:USERDNSDOMAIN\applications\PowerShell\JavaCerts\trusted.certs -Destination $JavaDeploymentPathRemote
+        if (-not (Test-Path -Path $JavaDeploymentPathRemote\deployment.config)) {
+            Invoke-Command -ComputerName $ComputerName -ScriptBlock {
+                "`ndeployment.system.security.trusted.certs=C\:\\Windows\\Sun\\Java\\Deployment\\trusted.certs" | Out-File $using:JavaDeploymentPathLocal\deployment.properties -Append -Encoding ascii
+                "deployment.system.config=file\:C\:/Windows/Sun/Java/Deployment/deployment.properties" | Out-File $using:JavaDeploymentPathLocal\deployment.config -Encoding ascii
+            }
+        }
+    }    
+}
