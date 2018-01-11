@@ -393,7 +393,13 @@ function Add-TervisRdsServer {
     Process {
         $SessionHost = $ComputerName + '.' + $DNSRoot
         If (-NOT (Get-RDServer -ConnectionBroker $RDBroker -Role RDS-RD-SERVER -ErrorAction SilentlyContinue | Where Server -Contains $SessionHost)) {
-            Add-RDServer -Server $SessionHost -ConnectionBroker $RDBroker -Role RDS-RD-SERVER
+            try {
+                Add-RDServer -Server $SessionHost -ConnectionBroker $RDBroker -Role RDS-RD-SERVER -ErrorAction Stop
+            } catch {
+                Write-Verbose "$ComputerName`: Pending reboot. Restarting."
+                Restart-Computer -ComputerName $ComputerName -Wait -Force
+                Add-RDServer -Server $SessionHost -ConnectionBroker $RDBroker -Role RDS-RD-SERVER
+            }
         }
     }
 }
