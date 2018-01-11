@@ -926,3 +926,14 @@ function Set-TervisEBSDiscovererMiscellaneousSettings {
         }
     }    
 }
+
+function Disable-AdobeScheduledTasks {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    process {
+        Invoke-Command -ComputerName $ComputerName -ScriptBlock {
+            Disable-ScheduledTask -TaskName *Adobe*
+        }
+    }    
+}
