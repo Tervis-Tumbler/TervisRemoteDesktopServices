@@ -1044,3 +1044,14 @@ function Disable-AdobeScheduledTasks {
         }
     }    
 }
+
+function Remove-TervisUserProfileOnComputer {
+    param (
+        [Parameter(Mandatory)]$SamAccountName,
+        [Parameter(Mandatory)]$ComputerName
+    )
+    $User = Get-ADUser -Identity $SamAccountName
+    Invoke-Command -ComputerName $ComputerName -ScriptBlock {
+        Get-WmiObject -Class Win32_UserProfile -Filter "SID = `"$($using:User.SID)`"" | Remove-WmiObject
+    }
+}
