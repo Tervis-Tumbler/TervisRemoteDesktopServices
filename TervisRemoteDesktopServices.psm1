@@ -234,6 +234,145 @@ $RemoteAppDefinition = [PSCustomObject][Ordered]@{
         RequiredCommandLine = "http://discoverer.delta.$((Get-ADDomain).DNSRoot):18091/discoverer/plus?eul=EUL_US&database=PRD&connectionAccessType=APPS&responsibility=Tervis%20Discoverer%20Reports -noframemerging"
         UserGroups = ""
     }
+},
+[PSCustomObject][Ordered]@{
+    Name = "ITToolbox"
+    CollectionName = "INF ITToolbox"
+    RemoteAppDefinition = ,@{
+        Alias = "chrome"
+        DisplayName = "ITT2016 - Google Chrome"
+        FilePath = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "Code"
+        DisplayName = "ITT2016 - Visual Studio Code"
+        FilePath = "C:\Program Files\Microsoft VS Code\Code.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "dsac"
+        DisplayName = "ITT2016 - Active Directory Administrative Center"
+        FilePath = "C:\Windows\system32\dsac.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "explorer"
+        DisplayName = "ITT2016 - Explorer"
+        FilePath = "C:\Windows\explorer.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "Helpdesk"
+        DisplayName = "ITT2016 - Helpdesk"
+        FilePath = "C:\Helpdesk.msc"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "iexplore"
+        DisplayName = "ITT2016 - Internet Explorer"
+        FilePath = "C:\Program Files\Internet Explorer\iexplore.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "ipscan"
+        DisplayName = "ITT2016 - Angry IP Scanner"
+        FilePath = "C:\Program Files\Angry IP Scanner\ipscan.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "powershell"
+        DisplayName = "ITT2016 - PowerShell"
+        FilePath = "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "PowerShell_ISE"
+        DisplayName = "ITT2016 - PowerShell ISE"
+        FilePath = "C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell_ISE.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "PROFILER"
+        DisplayName = "ITT2016 - SQL Server 2016 Profiler"
+        FilePath = "C:\Program Files (x86)\Microsoft SQL Server\130\Tools\Binn\PROFILER.EXE"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "PUTTY"
+        DisplayName = "ITT2016 - PuTTY"
+        FilePath = "C:\ProgramData\chocolatey\lib\putty.portable\tools\PUTTY.EXE"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "RemoteDesktopManager64"
+        DisplayName = "ITT2016 - Remote Desktop Manager (64-bit)"
+        FilePath = "C:\Program Files (x86)\Devolutions\Remote Desktop Manager\RemoteDesktopManager64.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "scjview"
+        DisplayName = "ITT2016 - Sybase Central (64-bit)"
+        FilePath = "C:\Program Files\SQL Anywhere 12\Bin64\scjview.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "ServerManager"
+        DisplayName = "ITT2016 - Server Manager"
+        FilePath = "C:\Windows\system32\ServerManager.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    },
+@{
+        Alias = "Ssms"
+        DisplayName = "ITT2016 - Microsoft SQL Server Management Studio"
+        FilePath = "C:\Program Files (x86)\Microsoft SQL Server\130\Tools\Binn\ManagementStudio\Ssms.exe"
+        ShowInWebAccess = [bool]$True
+        CommandLineSetting = "DoNotAllow"
+        RequiredCommandLine = ""
+        UserGroups = ""
+    }
 }
 
 
@@ -440,6 +579,20 @@ function Invoke-TervisFedExShipManagerRemoteAppProvision {
     $Nodes | Add-TervisRdsServer
     $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_RemoteApp_FedExShipManager'
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'FedEx Ship Manager RemoteApp/Server'
+    $Nodes | Add-TervisRdsSessionHost
+    $Nodes | Add-TervisRdsAppLockerLink
+    $Nodes | Invoke-RemoteAppNodeProvision
+}
+
+function Invoke-TervisITToolboxRemoteAppProvision {
+    param (
+        $EnvironmentName = "Infrastructure"
+    )
+    Invoke-ApplicationProvision -ApplicationName ITToolbox -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName ITToolbox -EnvironmentName $EnvironmentName
+    $Nodes | Add-TervisRdsServer
+    $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_RemoteApp_ITToolbox'
+    $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'IT Toolbox 2016'
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Invoke-RemoteAppNodeProvision
