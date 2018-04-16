@@ -590,7 +590,6 @@ function Invoke-TervisITToolboxRemoteAppProvision {
     )
     Invoke-ApplicationProvision -ApplicationName ITToolbox -EnvironmentName $EnvironmentName
     $Nodes = Get-TervisApplicationNode -ApplicationName ITToolbox -EnvironmentName $EnvironmentName
-    $Nodes | Install-TervisWindowsFeature -WindowsFeatureGroupNames ITToolbox
     $Nodes | Install-HelpDeskMMCOnITToolboxNode
     $Nodes | Add-TervisRdsServer
     $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_RemoteApp_ITToolbox'
