@@ -590,6 +590,8 @@ function Invoke-TervisITToolboxRemoteAppProvision {
     )
     Invoke-ApplicationProvision -ApplicationName ITToolbox -EnvironmentName $EnvironmentName
     $Nodes = Get-TervisApplicationNode -ApplicationName ITToolbox -EnvironmentName $EnvironmentName
+    $Nodes | Install-TervisWindowsFeature -WindowsFeatureGroupNames ITToolbox
+    $Nodes | Install-HelpDeskMMCOnITToolboxNode
     $Nodes | Add-TervisRdsServer
     $CollectionSecurityGroup = (Get-ADDomain).NetBIOSName + '\Privilege_RemoteApp_ITToolbox'
     $Nodes | New-TervisRdsSessionCollection -CollectionSecurityGroup $CollectionSecurityGroup -CollectionDescription 'IT Toolbox 2016'
@@ -1206,5 +1208,12 @@ function Remove-TervisUserProfileOnComputer {
     $User = Get-ADUser -Identity $SamAccountName
     Invoke-Command -ComputerName $ComputerName -ScriptBlock {
         Get-WmiObject -Class Win32_UserProfile -Filter "SID = `"$($using:User.SID)`"" | Remove-WmiObject
+    }
+}
+
+function Install-HelpDeskMMCOnITToolboxNode {
+    [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
+    process {
+        Copy-Item -Path "\\tervis.prv\applications\PowerShell\TervisRemoteApp\Helpdesk.msc" -Destination "\\$($ComputerName)\C$" -Force
     }
 }
