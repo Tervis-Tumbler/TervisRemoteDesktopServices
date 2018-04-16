@@ -282,6 +282,8 @@ $RemoteAppDefinition = [PSCustomObject][Ordered]@{
         CommandLineSetting = "DoNotAllow"
         RequiredCommandLine = ""
         UserGroups = ""
+        IconPath = "C:\Windows\System32\mmc.exe"
+        IconIndex = 0
     },
 @{
         Alias = "iexplore"
@@ -322,7 +324,7 @@ $RemoteAppDefinition = [PSCustomObject][Ordered]@{
 @{
         Alias = "PROFILER"
         DisplayName = "ITT2016 - SQL Server 2016 Profiler"
-        FilePath = "C:\Program Files (x86)\Microsoft SQL Server\130\Tools\Binn\PROFILER.EXE"
+        FilePath = "C:\Program Files (x86)\Microsoft SQL Server\140\Tools\Binn\PROFILER.EXE"
         ShowInWebAccess = [bool]$True
         CommandLineSetting = "DoNotAllow"
         RequiredCommandLine = ""
@@ -367,7 +369,7 @@ $RemoteAppDefinition = [PSCustomObject][Ordered]@{
 @{
         Alias = "Ssms"
         DisplayName = "ITT2016 - Microsoft SQL Server Management Studio"
-        FilePath = "C:\Program Files (x86)\Microsoft SQL Server\130\Tools\Binn\ManagementStudio\Ssms.exe"
+        FilePath = "C:\Program Files (x86)\Microsoft SQL Server\140\Tools\Binn\ManagementStudio\Ssms.exe"
         ShowInWebAccess = [bool]$True
         CommandLineSetting = "DoNotAllow"
         RequiredCommandLine = ""
@@ -1211,7 +1213,9 @@ function Remove-TervisUserProfileOnComputer {
 }
 
 function Install-HelpDeskMMCOnITToolboxNode {
-    [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
+    param (
+        [Parameter(ValueFromPipelineByPropertyName)]$ComputerName
+    )
     process {
         Copy-Item -Path "\\tervis.prv\applications\PowerShell\TervisRemoteApp\Helpdesk.msc" -Destination "\\$($ComputerName)\C$" -Force
     }
