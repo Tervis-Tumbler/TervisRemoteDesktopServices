@@ -1255,16 +1255,18 @@ KB4103731
     }
 
     process {
-        $Hotfix = Get-HotFix -ComputerName $Name
-        $Comparison = Compare-Object -ReferenceObject $CredSSPPatchKBs -DifferenceObject $Hotfix.HotfixID -IncludeEqual | Where-Object SideIndicator -eq "=="
-        $IsPatched = if ($Comparison) {$true} else {$false}
-        $KBInstalled = $Comparison.InputObject
-
+        try {
+            $Hotfix = Get-HotFix -ComputerName $Name -ErrorAction Stop
+            $Comparison = Compare-Object -ReferenceObject $CredSSPPatchKBs -DifferenceObject $Hotfix.HotfixID -IncludeEqual | Where-Object SideIndicator -eq "=="
+            $IsPatched = if ($Comparison) {$true} else {$false}
+            $KBInstalled = $Comparison.InputObject            
+        } catch {
+            Write-Warning "$Name could not be reached."
+        }
         [PSCustomObject]@{
             ComputerName = $Name
             IsPatched = $IsPatched
             KBInstalled = $KBInstalled
         }
-    } 
-
+    }
 }
