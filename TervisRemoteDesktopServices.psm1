@@ -1220,3 +1220,51 @@ function Install-HelpDeskMMCOnITToolboxNode {
         Copy-Item -Path "\\tervis.prv\applications\PowerShell\TervisRemoteApp\Helpdesk.msc" -Destination "\\$($ComputerName)\C$" -Force
     }
 }
+
+function Get-CredSSPVulnerabilityPatchStatus {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]
+        [Alias("ComputerName")]$Name
+    )
+
+    begin {
+        $CredSSPPatchKBs = @"
+KB4056448
+KB4056564
+KB4093107
+KB4093109
+KB4093111
+KB4093112
+KB4093114
+KB4093118
+KB4093119
+KB4093123
+KB4103712
+KB4103715
+KB4103716
+KB4103718
+KB4103721
+KB4103723
+KB4103725
+KB4103726
+KB4103727
+KB4103728
+KB4103730
+KB4103731
+"@ -split "\r\n"
+    }
+
+    process {
+        $Hotfix = Get-HotFix -ComputerName $Name
+        $Comparison = Compare-Object -ReferenceObject $CredSSPPatchKBs -DifferenceObject $Hotfix.HotfixID -IncludeEqual | Where-Object SideIndicator -eq "=="
+        $IsPatched = if ($Comparison) {$true} else {$false}
+        $KBInstalled = $Comparison.InputObject
+
+        [PSCustomObject]@{
+            ComputerName = $Name
+            IsPatched = $IsPatched
+            KBInstalled = $KBInstalled
+        }
+    } 
+
+}
