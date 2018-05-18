@@ -1024,7 +1024,7 @@ function Set-TervisRDCertificate {
     $RDBroker = Get-TervisRDBroker
     $CertificatePath = "$env:TEMP\certificate.pfx"
     $CertificateCredential = (Get-PasswordstateCredential -PasswordID 2570)
-    Get-PasswordstateDocument -DocumentID 3 -FilePath $CertificatePath
+    TervisPasswordstatePowershell\Get-PasswordstateDocument -DocumentID 3 -FilePath $CertificatePath
     Set-RDCertificate -Role $Role -ImportPath $CertificatePath -Password $CertificateCredential.Password -ConnectionBroker $RDBroker -Force
     Remove-Item -Path $CertificatePath -Force
 }
@@ -1237,6 +1237,56 @@ function Invoke-FileExplorerRemoteAppNotRefreshingFix {
         Invoke-Command -ComputerName $ComputerName -ScriptBlock {
             New-Item -Path "hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\EXPLORER.EXE" -Force
             New-ItemProperty -Path "hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\EXPLORER.EXE" -Name DontUseDesktopChangeRouter -PropertyType DWORD -Value 1 -Force
+        }
+    }
+}
+
+function Get-CredSSPVulnerabilityPatchStatus {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]
+        [Alias("ComputerName")]$Name
+    )
+
+    begin {
+        $CredSSPPatchKBs = @"
+KB4056448
+KB4056564
+KB4093107
+KB4093109
+KB4093111
+KB4093112
+KB4093114
+KB4093118
+KB4093119
+KB4093123
+KB4103712
+KB4103715
+KB4103716
+KB4103718
+KB4103721
+KB4103723
+KB4103725
+KB4103726
+KB4103727
+KB4103728
+KB4103730
+KB4103731
+"@ -split "\r\n"
+    }
+
+    process {
+        try {
+            $Hotfix = Get-HotFix -ComputerName $Name -ErrorAction Stop
+            $Comparison = Compare-Object -ReferenceObject $CredSSPPatchKBs -DifferenceObject $Hotfix.HotfixID -IncludeEqual | Where-Object SideIndicator -eq "=="
+            $IsPatched = if ($Comparison) {$true} else {$false}
+            $KBInstalled = $Comparison.InputObject            
+        } catch {
+            Write-Warning "$Name could not be reached."
+        }
+        [PSCustomObject]@{
+            ComputerName = $Name
+            IsPatched = $IsPatched
+            KBInstalled = $KBInstalled
         }
     }
 }
