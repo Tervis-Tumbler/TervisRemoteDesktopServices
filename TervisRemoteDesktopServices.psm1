@@ -420,6 +420,7 @@ function Invoke-RemoteWebBrowserAppProvision {
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Update-StoreManagerToStoresRdsPrivilege
+    $Nodes | Invoke-FileExplorerRemoteAppNotRefreshingFix
 }
 
 function Invoke-StoresRemoteDesktopProvision {
@@ -449,6 +450,7 @@ function Invoke-KeyscanRemoteAppProvision {
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Set-KeyscanOptions -DatabaseLocation Keyscan
+    $Nodes | Invoke-FileExplorerRemoteAppNotRefreshingFix
 }
 
 function Invoke-WCSRemoteAppProvision {
@@ -497,6 +499,7 @@ function Invoke-WindowsAppsRemoteAppProvision {
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Invoke-RemoteAppNodeProvision
+    $Nodes | Invoke-FileExplorerRemoteAppNotRefreshingFix
 }
 
 function Invoke-TervisEBSRemoteAppProvision {
@@ -519,6 +522,7 @@ function Invoke-TervisEBSRemoteAppProvision {
     $Nodes | Invoke-RemoteAppNodeProvision
     $Nodes | Invoke-EBSWebADIServer2016CompatibilityHack
     $Nodes | Set-TervisEBSRemoteAppFileAssociations
+    $Nodes | Invoke-FileExplorerRemoteAppNotRefreshingFix
 }
 
 function Invoke-TervisEBSBusinessIntelligenceRemoteAppProvision {
@@ -538,6 +542,7 @@ function Invoke-TervisEBSBusinessIntelligenceRemoteAppProvision {
     $Nodes | Disable-JavaUpdate
     $Nodes | Set-TervisEBSRemoteAppBrowserPreferences
     $Nodes | Invoke-RemoteAppNodeProvision
+    $Nodes | Invoke-FileExplorerRemoteAppNotRefreshingFix
 }
 
 function Invoke-TervisEBSDiscovererRemoteAppProvision {
@@ -556,6 +561,7 @@ function Invoke-TervisEBSDiscovererRemoteAppProvision {
     $Nodes | Install-TervisJavaDeploymentRuleSet
     $Nodes | Disable-JavaUpdate
     $Nodes | Invoke-RemoteAppNodeProvision
+    $Nodes | Invoke-FileExplorerRemoteAppNotRefreshingFix
 }
 
 function Invoke-SilverlightIERemoteAppProvision {
@@ -570,6 +576,7 @@ function Invoke-SilverlightIERemoteAppProvision {
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Invoke-RemoteAppNodeProvision
+    $Nodes | Invoke-FileExplorerRemoteAppNotRefreshingFix
 }
 
 function Invoke-TervisFedExShipManagerRemoteAppProvision {
