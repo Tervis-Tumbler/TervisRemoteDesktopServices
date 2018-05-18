@@ -599,6 +599,7 @@ function Invoke-TervisITToolboxRemoteAppProvision {
     $Nodes | Add-TervisRdsSessionHost
     $Nodes | Add-TervisRdsAppLockerLink
     $Nodes | Invoke-RemoteAppNodeProvision
+    $Nodes | Invoke-FileExplorerRemoteAppNotRefreshingFix
 }
 
 function Invoke-RemoteDesktopGatewayProvision {
@@ -1218,5 +1219,17 @@ function Install-HelpDeskMMCOnITToolboxNode {
     )
     process {
         Copy-Item -Path "\\tervis.prv\applications\PowerShell\TervisRemoteApp\Helpdesk.msc" -Destination "\\$($ComputerName)\C$" -Force
+    }
+}
+
+function Invoke-FileExplorerRemoteAppNotRefreshingFix {
+    param (
+        [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
+    )
+    process {
+        Invoke-Command -ComputerName $ComputerName -ScriptBlock {
+            New-Item -Path "hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\EXPLORER.EXE" -Force
+            New-ItemProperty -Path "hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\EXPLORER.EXE" -Name DontUseDesktopChangeRouter -PropertyType DWORD -Value 1 -Force
+        }
     }
 }
