@@ -1024,7 +1024,7 @@ function Set-TervisRDCertificate {
     $RDBroker = Get-TervisRDBroker
     $CertificatePath = "$env:TEMP\certificate.pfx"
     $CertificateCredential = (Get-PasswordstatePassword -AsCredential -ID 2570)
-    TervisPasswordstatePowershell\Get-PasswordstateDocument -DocumentID 3 -FilePath $CertificatePath
+    Get-PasswordstateDocument -DocumentID 3 -OutFile $CertificatePath -DocumentLocation password
     Set-RDCertificate -Role $Role -ImportPath $CertificatePath -Password $CertificateCredential.Password -ConnectionBroker $RDBroker -Force
     Remove-Item -Path $CertificatePath -Force
 }
