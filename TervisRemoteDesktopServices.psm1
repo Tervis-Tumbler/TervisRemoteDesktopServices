@@ -782,7 +782,7 @@ function Install-StoresRDSRemoteDesktopPrivilegeScheduledTasks {
         [Parameter(Mandatory,ValueFromPipelineByPropertyName)]$ComputerName
     )
     begin {
-        $ScheduledTaskCredential = New-Object System.Management.Automation.PSCredential (Get-PasswordstateCredential -PasswordID 259)
+        $ScheduledTaskCredential = New-Object System.Management.Automation.PSCredential (Get-PasswordstatePassword -AsCredential -ID 259)
         $Execute = 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
         $Argument = '-Command Update-StoreManagerToStoresRdsPrivilege -NoProfile'
     }
@@ -1023,7 +1023,7 @@ function Set-TervisRDCertificate {
     )
     $RDBroker = Get-TervisRDBroker
     $CertificatePath = "$env:TEMP\certificate.pfx"
-    $CertificateCredential = (Get-PasswordstateCredential -PasswordID 2570)
+    $CertificateCredential = (Get-PasswordstatePassword -AsCredential -ID 2570)
     TervisPasswordstatePowershell\Get-PasswordstateDocument -DocumentID 3 -FilePath $CertificatePath
     Set-RDCertificate -Role $Role -ImportPath $CertificatePath -Password $CertificateCredential.Password -ConnectionBroker $RDBroker -Force
     Remove-Item -Path $CertificatePath -Force
@@ -1153,7 +1153,7 @@ function Install-InvokeEBSWebADIServer2016CompatibilityHackScheduledTask {
     )
     begin {
         $TaskName = "Invoke-EBSWebADIServer2016CompatibilityHack"
-        $ScheduledTaskCredential = New-Object System.Management.Automation.PSCredential (Get-PasswordstateCredential -PasswordID 259)
+        $ScheduledTaskCredential = Get-PasswordstatePassword -AsCredential -ID 259
         $Execute = 'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe'
         $Argument = '-Command "& {Get-TervisApplicationNode -ApplicationName EBSRemoteApp -EnvironmentName Infrastructure | Invoke-EBSWebADIServer2016CompatibilityHack -NoBackup}"'
     }
