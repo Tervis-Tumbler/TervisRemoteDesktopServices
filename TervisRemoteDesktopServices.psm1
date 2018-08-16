@@ -222,7 +222,7 @@ $RemoteAppDefinition = [PSCustomObject][Ordered]@{
         FilePath = "C:\Program Files\Internet Explorer\iexplore.exe"
         ShowInWebAccess = [bool]$True
         CommandLineSetting = "Require"
-        RequiredCommandLine = "http://discoverer.epsilon.$((Get-ADDomain).DNSRoot):18090/discoverer/plus?eul=EUL_US&database=PRD&connectionAccessType=APPS&responsibility=Tervis%20Discoverer%20Reports -noframemerging"
+        RequiredCommandLine = "http://discoverer.epsilon.$((Get-ADDomain).DNSRoot):18090/discoverer/plus?eul=EUL_US&database=SIT&connectionAccessType=APPS&responsibility=Tervis%20Discoverer%20Reports -noframemerging"
         UserGroups = ""
     },
 @{
@@ -231,7 +231,7 @@ $RemoteAppDefinition = [PSCustomObject][Ordered]@{
         FilePath = "C:\Program Files\Internet Explorer\iexplore.exe"
         ShowInWebAccess = [bool]$True
         CommandLineSetting = "Require"
-        RequiredCommandLine = "http://discoverer.delta.$((Get-ADDomain).DNSRoot):18091/discoverer/plus?eul=EUL_US&database=PRD&connectionAccessType=APPS&responsibility=Tervis%20Discoverer%20Reports -noframemerging"
+        RequiredCommandLine = "http://discoverer.delta.$((Get-ADDomain).DNSRoot):18091/discoverer/plus?eul=EUL_US&database=DEV&connectionAccessType=APPS&responsibility=Tervis%20Discoverer%20Reports -noframemerging"
         UserGroups = ""
     }
 },
