@@ -520,9 +520,9 @@ function Invoke-TervisEBSRemoteAppProvision {
     $Nodes | Set-TervisEBSRemoteAppBrowserPreferences
     $Nodes | Set-TervisEPSConfiguration
     $Nodes | Invoke-RemoteAppNodeProvision
-    $Nodes | Invoke-EBSWebADIServer2016CompatibilityHack
+    # $Nodes | Invoke-EBSWebADIServer2016CompatibilityHack
     $Nodes | Set-TervisEBSRemoteAppFileAssociations
-    $Nodes | Invoke-FileExplorerRemoteAppNotRefreshingFix
+    # $Nodes | Invoke-FileExplorerRemoteAppNotRefreshingFix
 }
 
 function Invoke-TervisEBSBusinessIntelligenceRemoteAppProvision {
