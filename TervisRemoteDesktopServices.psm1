@@ -1290,3 +1290,11 @@ KB4103731
         }
     }
 }
+
+function Invoke-RiminiSupportProvision {
+    param (
+        $EnvironmentName
+    )
+    Invoke-ApplicationProvision -ApplicationName RiminiSupport -EnvironmentName $EnvironmentName
+    $Nodes = Get-TervisApplicationNode -ApplicationName RiminiSupport -EnvironmentName $EnvironmentName
+}
